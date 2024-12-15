@@ -1,0 +1,110 @@
+<!-- views/customer/pages/profile/edit-alamat.ejs -->
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Edit Alamat</h2>
+
+          <form
+            action="/profile/alamat/edit/<%= alamat.id_alamat_pelanggan %>"
+            method="POST"
+          >
+
+            <div class="mb-3">
+              <label for="area_code" class="form-label">Area Pengiriman</label>
+              <!-- Di tambah-alamat.ejs dan edit-alamat.ejs, bagian select area -->
+              <select class="form-select" id="area_code" name="area_code" required>
+                <option value="">Pilih area pengiriman</option>
+                <% if(areas && areas.length > 0) { %>
+                  <% areas.forEach(area => { %>
+                    <option value="<%= area.kode_area %>" 
+                      <%= locals.alamat && area.kode_area === alamat.area_code ? 'selected' : '' %>>
+                      <%= area.nama_area %> - Rp <%= area.biaya_pengiriman.toLocaleString('id-ID') %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+
+              <div class="form-text">Area ini menentukan biaya pengiriman untuk layanan kurir</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="alamat_jalan" class="form-label"
+                >Alamat Lengkap</label
+              >
+              <textarea
+                class="form-control"
+                id="alamat_jalan"
+                name="alamat_jalan"
+                rows="3"
+                required
+              >
+<%= alamat.alamat_jalan %></textarea
+              >
+              <div class="form-text">
+                Masukkan nama jalan, nomor rumah, rt/rw, kelurahan
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="kecamatan" class="form-label">Kecamatan</label>
+              <input
+                type="text"
+                class="form-control"
+                id="kecamatan"
+                name="kecamatan"
+                value="<%= alamat.kecamatan %>"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="provinsi" class="form-label">Provinsi</label>
+              <input
+                type="text"
+                class="form-control"
+                id="provinsi"
+                name="provinsi"
+                value="<%= alamat.provinsi %>"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="kode_pos" class="form-label">Kode Pos</label>
+              <input
+                type="text"
+                class="form-control"
+                id="kode_pos"
+                name="kode_pos"
+                value="<%= alamat.kode_pos %>"
+                required
+              />
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i>Simpan Perubahan
+              </button>
+              <a href="/profile" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Kembali
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+
+  .btn {
+    padding: 0.6rem 1rem;
+  }
+</style>

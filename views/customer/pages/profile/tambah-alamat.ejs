@@ -1,0 +1,132 @@
+<!-- views/customer/pages/profile/tambah-alamat.ejs -->
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Tambah Alamat Baru</h2>
+
+          <% if(messages.error) { %>
+          <div class="alert alert-danger alert-dismissible fade show">
+            <%= messages.error %>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+            ></button>
+          </div>
+          <% } %>
+
+          <form action="/profile/alamat/tambah" method="POST">
+            <!-- Area Pengiriman -->
+            <div class="mb-3">
+              <label for="area_code" class="form-label">Area Pengiriman</label>
+              <!-- Di tambah-alamat.ejs dan edit-alamat.ejs, bagian select area -->
+              <select class="form-select" id="area_code" name="area_code" required>
+                <option value="">Pilih area pengiriman</option>
+                <% if(areas && areas.length > 0) { %>
+                  <% areas.forEach(area => { %>
+                    <option value="<%= area.kode_area %>" 
+                      <%= locals.alamat && area.kode_area === alamat.area_code ? 'selected' : '' %>>
+                      <%= area.nama_area %> - Rp <%= area.biaya_pengiriman.toLocaleString('id-ID') %>
+                    </option>
+                  <% }) %>
+                <% } %>
+              </select>
+
+              <div class="form-text">
+                Area ini menentukan biaya pengiriman untuk layanan kurir
+              </div>
+            </div>
+
+            <!-- Alamat Lengkap -->
+            <div class="mb-3">
+              <label for="alamat_jalan" class="form-label"
+                >Alamat Lengkap</label
+              >
+              <textarea
+                class="form-control"
+                id="alamat_jalan"
+                name="alamat_jalan"
+                rows="3"
+                placeholder="Contoh: Jl. Mawar No. 10 RT 02/RW 03"
+                required
+              ></textarea>
+              <div class="form-text">
+                Masukkan alamat lengkap termasuk nomor rumah dan RT/RW
+              </div>
+            </div>
+
+            <!-- Kecamatan -->
+            <div class="mb-3">
+              <label for="kecamatan" class="form-label">Kecamatan</label>
+              <input
+                type="text"
+                class="form-control"
+                id="kecamatan"
+                name="kecamatan"
+                placeholder="Contoh: Kalideres"
+                required
+              />
+            </div>
+
+            <!-- Provinsi -->
+            <div class="mb-3">
+              <label for="provinsi" class="form-label">Provinsi</label>
+              <input
+                type="text"
+                class="form-control"
+                id="provinsi"
+                name="provinsi"
+                placeholder="Contoh: DKI Jakarta"
+                required
+              />
+            </div>
+
+            <!-- Kode Pos -->
+            <div class="mb-3">
+              <label for="kode_pos" class="form-label">Kode Pos</label>
+              <input
+                type="text"
+                class="form-control"
+                id="kode_pos"
+                name="kode_pos"
+                placeholder="Contoh: 11840"
+                required
+                pattern="[0-9]{5}"
+                title="Kode pos harus 5 digit angka"
+              />
+            </div>
+
+            <!-- Tombol Submit -->
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Tambah Alamat
+              </button>
+              <a href="/profile" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Kembali
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+
+  .btn {
+    padding: 0.6rem 1rem;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+  }
+</style>

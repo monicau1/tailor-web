@@ -1,0 +1,251 @@
+<!-- views/admin/pesanan/pesanan.ejs -->
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="mb-0">Daftar Pesanan</h3>
+      <p class="text-muted">Kelola semua pesanan pelanggan</p>  
+    </div>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form id="filterForm" method="GET" action="/admin/pesanan">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="input-group">
+              <input type="text" class="form-control" id="searchInput" name="search" 
+                     placeholder="Cari no pesanan/nama..." value="<%= query.search || '' %>">
+              <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <select class="form-select" id="filterService" name="jenis_layanan" onchange="this.form.submit()">
+              <option value="">Semua Layanan</option>
+              <option value="pakaian" <%= query.jenis_layanan === 'pakaian' ? 'selected' : '' %>>Jahit Pakaian</option>
+              <option value="permak" <%= query.jenis_layanan === 'permak' ? 'selected' : '' %>>Permak</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text">Periode</span>
+              <input type="date" class="form-control" id="startDate" name="start_date" 
+                     value="<%= query.start_date || '' %>">
+              <span class="input-group-text">-</span>
+              <input type="date" class="form-control" id="endDate" name="end_date"
+                     value="<%= query.end_date || '' %>">
+            </div>
+          </div>
+
+          <div class="col-md-1">
+            <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+              <i class="fas fa-undo"></i>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tabel Pesanan -->
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>No. Pesanan</th>
+            <th>Tanggal</th>
+            <th>Pelanggan</th>
+            <th>Layanan</th>
+            <th>Detail</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Estimasi</th>
+            <th width="100">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pesananList.forEach(function(pesanan) { %>
+            <tr class="pesanan-row" data-status="<%= pesanan.Status.nama_status %>">
+              <td>
+                <strong>#<%= pesanan.id_pesanan %></strong>
+                <div class="text-muted small"><%= formatTime(pesanan.tanggal_pesanan) %></div>
+              </td>
+              <td><%= formatDate(pesanan.tanggal_pesanan) %></td>
+              <td>
+                <div><%= pesanan.PelangganPesanan.nama_pelanggan %></div>
+                <div class="text-muted small">
+                  <%= pesanan.PelangganPesanan.nomor_telepon_pelanggan || '-' %>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-<%= pesanan.jenis_layanan === 'permak' ? 'info' : 'primary' %>">
+                  <%= pesanan.jenis_layanan === 'permak' ? 'Permak' : 'Jahit Pakaian' %>
+                </span>
+              </td>
+              <td>
+                <% if(pesanan.jenis_layanan === 'permak') { %>
+                  <!-- Info Permak -->
+                  <% if(pesanan.PesananPermak && pesanan.PesananPermak.length > 0) { %>
+                    <small class="d-block">
+                      <% pesanan.PesananPermak.forEach(function(permak) { %>
+                        <div><%= permak.KategoriPermak?.nama_kategori_permak %></div>
+                      <% }); %>
+                    </small>
+                  <% } %>
+                <% } else { %>
+                  <!-- Info Pakaian -->
+                  <% if(pesanan.PesananPakaian) { %>
+                    <small class="d-block">
+                      <%= pesanan.PesananPakaian.VarianPakaian?.Pakaian?.nama_pakaian %>
+                      (<%= pesanan.PesananPakaian.kuantitas %> pcs)
+                    </small>
+                  <% } %>
+                <% } %>
+              </td>
+              <td class="text-end">
+                Rp <%= formatNumber(pesanan.jumlah_total) %>
+              </td>
+              <td>
+                <span class="badge bg-<%= getStatusColor(pesanan.Status.nama_status) %>">
+                  <%= getStatusDisplay(pesanan.Status.nama_status) %>
+                </span>
+              </td>
+              <td>
+                <%= pesanan.estimasi_selesai ? formatDate(pesanan.estimasi_selesai) : '-' %>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/pesanan/<%= pesanan.id_pesanan %>" 
+                     class="btn btn-outline-primary" title="Detail">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                  <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                          data-bs-toggle="dropdown"></button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item text-info" href="#" 
+                         onclick="updateStatus('<%= pesanan.id_pesanan %>')">
+                        <i class="fas fa-edit me-2"></i> Update Status
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="#" 
+                         onclick="printInvoice('<%= pesanan.id_pesanan %>')">
+                        <i class="fas fa-print me-2"></i> Cetak Invoice
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="card-footer d-flex justify-content-between align-items-center">
+      <div>
+        Menampilkan <%= pesananList.length %> dari <%= totalPesanan %> pesanan
+      </div>
+      <% if (pagination.totalPages > 1) { %>
+        <nav aria-label="Page navigation">
+          <ul class="pagination pagination-sm mb-0">
+            <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+              <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                <a class="page-link" href="?page=<%= i %>
+                  <%= query.search ? '&search=' + query.search : '' %>
+                  <%= query.jenis_layanan ? '&jenis_layanan=' + query.jenis_layanan : '' %>
+                  <%= query.start_date ? '&start_date=' + query.start_date : '' %>
+                  <%= query.end_date ? '&end_date=' + query.end_date : '' %>">
+                    <%= i %>
+                  </a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .badge {
+    font-weight: 500;
+    padding: 0.5em 0.8em;
+  }
+
+  .table > tbody > tr > td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+  }
+
+  .btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+  }
+
+  .small {
+    font-size: 0.875rem;
+  }
+</style>
+
+<script>
+// Gabungkan kedua script menjadi satu
+document.addEventListener('DOMContentLoaded', function() {
+  const filterForm = document.getElementById('filterForm');
+  const searchInput = document.getElementById('searchInput');
+  const filterService = document.getElementById('filterService');
+  const startDate = document.getElementById('startDate');
+  const endDate = document.getElementById('endDate');
+  
+  // Set tanggal maksimum ke hari ini
+  const today = new Date().toISOString().split('T')[0];
+  startDate.max = today;
+  endDate.max = today;
+  
+  // Validasi range tanggal
+  startDate.addEventListener('change', function() {
+    endDate.min = this.value;
+    if(endDate.value && endDate.value < this.value) {
+      endDate.value = this.value;
+    }
+    filterForm.submit(); // Submit form ketika tanggal berubah
+  });
+  
+  endDate.addEventListener('change', function() {
+    startDate.max = this.value;
+    if(startDate.value && startDate.value > this.value) {
+      startDate.value = this.value;
+    }
+    filterForm.submit(); // Submit form ketika tanggal berubah
+  });
+
+  // Reset filter function
+  window.resetFilters = function() {
+    searchInput.value = '';
+    filterService.value = '';
+    startDate.value = '';
+    endDate.value = '';
+    filterForm.submit();
+  }
+
+  // Update status function
+  window.updateStatus = function(id) {
+    window.location.href = `/admin/pesanan/${id}`;
+  }
+
+  // Print invoice function
+  window.printInvoice = function(id) {
+    window.open(`/admin/pesanan/${id}/invoice`, '_blank');
+  }
+});
+</script>

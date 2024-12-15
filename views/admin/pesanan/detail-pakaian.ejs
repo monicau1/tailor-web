@@ -1,0 +1,476 @@
+<!-- views/admin/pesanan/detail-pakaian.ejs -->
+<div class="container-fluid py-4">
+  <!-- Header Invoice-like -->
+  <div class="card">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <h4>Detail Pesanan #<%= pesanan.id_pesanan %></h4>
+          <p class="text-muted mb-0">
+            Tanggal Pesanan: <%= formatDate(pesanan.tanggal_pesanan) %>
+          </p>
+        </div>
+        <div class="text-end">
+          <div class="mb-2">
+            <span class="badge bg-<%= getStatusColor(pesanan.Status.nama_status) %> fs-6">
+              <%= getStatusDisplay(pesanan.Status.nama_status) %>
+            </span>
+          </div>
+          <button class="btn btn-sm btn-primary mt-2" onclick="updateStatus()">
+            Update Status
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Pelanggan & Pengiriman -->
+      <div class="row mb-4">
+        <!-- Informasi Pelanggan -->
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="text-muted mb-3">Informasi Pelanggan:</h6>
+            <p class="mb-1">
+              <strong><%= pesanan.PelangganPesanan?.nama_pelanggan %></strong>
+            </p>
+            <p class="mb-1">
+              <i class="fas fa-phone me-1"></i>
+              <%= pesanan.PelangganPesanan?.nomor_telepon_pelanggan || '-' %>
+            </p>
+            <p class="mb-0">
+              <i class="fas fa-envelope me-1"></i>
+              <%= pesanan.PelangganPesanan?.email_pelanggan || '-' %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Informasi Pengiriman -->
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="text-muted mb-3">Informasi Pengiriman:</h6>
+            <div class="d-flex align-items-center mb-3">
+              <strong class="me-2">Metode Pengiriman:</strong>
+              <span class="badge <%= pesanan.Pengiriman?.metode_pengiriman === 'self_pickup' ? 'bg-info' : 'bg-primary' %>">
+                <%= pesanan.Pengiriman?.metode_pengiriman === 'self_pickup' ? 'Ambil di Toko' : 'Pengiriman' %>
+              </span>
+            </div>
+
+            <% if (pesanan.Pengiriman?.Alamat) { %>
+              <div class="ps-3 border-start">
+                <small class="text-muted">Alamat Pengiriman:</small>
+                <p class="mb-1"><%= pesanan.Pengiriman.Alamat.alamat_jalan %></p>
+                <p class="mb-0">
+                  <%= pesanan.Pengiriman.Alamat.kecamatan %>,
+                  <%= pesanan.Pengiriman.Alamat.provinsi %>
+                  (<%= pesanan.Pengiriman.Alamat.kode_pos %>)
+                </p>
+              </div>
+            <% } else { %>
+              <p class="text-muted mb-0">Diambil di toko</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Item -->
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 100px">Gambar</th>
+              <th style="width: 40%">Item Pakaian</th>
+              <th class="text-center">Ukuran</th>
+              <th class="text-center">Warna</th>
+              <th class="text-center">Jumlah</th>
+              <th class="text-end">Harga</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <!-- Gambar Produk -->
+              <td>
+                <% if(pesanan.PesananPakaian?.VarianPakaian?.Pakaian?.GambarPakaian?.[0]) { %>
+                  <img 
+                    src="/uploads/admin/produk-pakaian/<%= pesanan.PesananPakaian.VarianPakaian.Pakaian.GambarPakaian[0].nama_file %>"
+                    class="img-thumbnail cursor-pointer"
+                    onclick="viewImage(this.src)"
+                    style="width: 80px; height: 80px; object-fit: cover"
+                    alt="<%= pesanan.PesananPakaian.VarianPakaian.Pakaian.nama_pakaian %>"
+                    onerror="this.onerror=null; this.src='/images/default-produk.jpg';"
+                  >
+                <% } else { %>
+                  <div class="placeholder-image">
+                    <i class="fas fa-tshirt text-muted"></i>
+                  </div>
+                <% } %>
+              </td>
+
+              <!-- Info Produk -->
+              <td>
+                <h6 class="mb-1">
+                  <%= pesanan.PesananPakaian?.VarianPakaian?.Pakaian?.nama_pakaian %>
+                </h6>
+                <% if (pesanan.PesananPakaian?.catatan) { %>
+                  <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <%= pesanan.PesananPakaian.catatan %>
+                  </small>
+                <% } %>
+              </td>
+
+              <!-- Ukuran -->
+              <td class="text-center">
+                <span class="badge bg-light text-dark">
+                  <%= pesanan.PesananPakaian?.VarianPakaian?.ukuran || '-' %>
+                </span>
+              </td>
+
+              <!-- Warna -->
+              <td class="text-center">
+                <span class="badge bg-light text-dark">
+                  <%= pesanan.PesananPakaian?.VarianPakaian?.warna || '-' %>
+                </span>
+              </td>
+
+              <!-- Jumlah -->
+              <td class="text-center">
+                <span class="badge bg-primary">
+                  <%= pesanan.PesananPakaian?.kuantitas %>
+                </span>
+              </td>
+
+              <!-- Harga Per Item -->
+              <td class="text-end">
+                Rp <%= formatNumber(pesanan.PesananPakaian?.harga_per_item) %>
+              </td>
+
+              <!-- Total -->
+              <td class="text-end">
+                <strong>
+                  Rp <%= formatNumber(pesanan.PesananPakaian?.harga_per_item * pesanan.PesananPakaian?.kuantitas) %>
+                </strong>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot class="table-light">
+            <!-- Subtotal -->
+            <tr>
+              <td colspan="6" class="text-end"><strong>Subtotal</strong></td>
+              <td class="text-end">
+                <% const subtotal = pesanan.PesananPakaian ? 
+                  (pesanan.PesananPakaian.harga_per_item * pesanan.PesananPakaian.kuantitas) : 0 %>
+                <strong>Rp <%= formatNumber(subtotal) %></strong>
+              </td>
+            </tr>
+
+            <!-- Ongkos Kirim -->
+            <% if (pesanan.Pengiriman?.biaya_pengiriman > 0) { %>
+              <tr>
+                <td colspan="6" class="text-end">Biaya Pengiriman</td>
+                <td class="text-end">
+                  Rp <%= formatNumber(pesanan.Pengiriman.biaya_pengiriman) %>
+                </td>
+              </tr>
+            <% } %>
+
+            <!-- Total -->
+            <tr>
+              <td colspan="6" class="text-end"><strong>Total</strong></td>
+              <td class="text-end">
+                <h5 class="mb-0">Rp <%= formatNumber(pesanan.jumlah_total) %></h5>
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Info Pembayaran & Riwayat Status -->
+      <div class="row">
+        <!-- Info Pembayaran -->
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="mb-3">Informasi Pembayaran</h6>
+            <table class="table table-sm table-borderless mb-0">
+              <tr>
+                <td style="width: 150px">Status</td>
+                <td>
+                  : <span class="badge bg-<%= pesanan.Pembayaran?.status_pembayaran === 'paid' ? 'success' : 'warning' %>">
+                    <%= formatStatus(pesanan.Pembayaran?.status_pembayaran || 'pending') %>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Metode</td>
+                <td>: <%= pesanan.Pembayaran?.metode_pembayaran || '-' %></td>
+              </tr>
+              <tr>
+                <td>Tanggal</td>
+                <td>: <%= pesanan.Pembayaran?.tanggal_pembayaran ? formatDateTime(pesanan.Pembayaran.tanggal_pembayaran) : '-' %></td>
+              </tr>
+              <% if (pesanan.Pembayaran?.catatan_pembayaran) { %>
+                <tr>
+                  <td>Catatan</td>
+                  <td>: <%= pesanan.Pembayaran.catatan_pembayaran %></td>
+                </tr>
+              <% } %>
+              
+              <% if (pesanan.Pembayaran?.bukti_pembayaran) { %>
+                <tr>
+                  <td>Bukti</td>
+                  <td>
+                    : <a href="#" onclick="validatePayment('/uploads/pelanggan/pembayaran/<%= pesanan.Pembayaran.bukti_pembayaran %>')">
+                        Lihat & Validasi Bukti
+                      </a>
+                  </td>
+                </tr>
+              <% } %>
+            </table>
+          </div>
+        </div>
+
+        <!-- Riwayat Status -->
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="mb-3">Riwayat Status</h6>
+            <div class="timeline">
+              <% pesanan.RiwayatStatus?.sort((a, b) => new Date(b.tanggal_status) - new Date(a.tanggal_status)).forEach(riwayat => { %>
+                <div class="timeline-item">
+                  <div class="d-flex">
+                    <div class="flex-shrink-0">
+                      <span class="badge bg-<%= getStatusColor(riwayat.StatusRiwayat.nama_status) %>">
+                        <%= getStatusDisplay(riwayat.StatusRiwayat.nama_status) %>
+                      </span>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <small class="text-muted d-block">
+                        <%= formatDateTime(riwayat.tanggal_status) %>
+                      </small>
+                      <% if (riwayat.keterangan) { %>
+                        <small class="text-muted"><%= riwayat.keterangan %></small>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="text-end mt-3">
+    <a href="/admin/pesanan" class="btn btn-outline-secondary me-2">
+      <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+    <button class="btn btn-primary" onclick="printOrder()">
+      <i class="fas fa-print"></i> Cetak
+    </button>
+  </div>
+</div>
+
+<!-- Modal Validasi Pembayaran -->
+<div class="modal fade" id="paymentValidationModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Validasi Pembayaran</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Preview Bukti -->
+        <div class="text-center mb-3">
+          <img 
+            id="paymentProofPreview" 
+            src="" 
+            class="img-fluid mb-3" 
+            alt="Bukti Pembayaran"
+            style="max-height: 400px"
+          >
+        </div>
+        
+        <!-- Form Validasi -->
+        <form id="paymentValidationForm">
+          <input type="hidden" name="id_pesanan" value="<%= pesanan.id_pesanan %>">
+          
+          <div class="mb-3">
+            <label class="form-label">Status Pembayaran</label>
+            <select class="form-select" name="status_pembayaran" required>
+              <option value="pending" <%= pesanan.Pembayaran?.status_pembayaran === 'pending' ? 'selected' : '' %>>Menunggu Verifikasi</option>
+              <option value="paid" <%= pesanan.Pembayaran?.status_pembayaran === 'paid' ? 'selected' : '' %>>Valid & Diterima</option>
+              <option value="failed" <%= pesanan.Pembayaran?.status_pembayaran === 'failed' ? 'selected' : '' %>>Tidak Valid/Ditolak</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Catatan Validasi</label>
+            <textarea class="form-control" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" onclick="savePaymentValidation()">Simpan Validasi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Update Status -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Update Status Pesanan #<%= pesanan.id_pesanan %>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="updateStatusForm">
+          <input type="hidden" name="pesananId" value="<%= pesanan.id_pesanan %>" />
+          <input type="hidden" name="currentStatus" value="<%= pesanan.Status.nama_status %>" />
+
+          <!-- Status Selection -->
+          <div class="mb-3">
+            <label class="form-label">Status Saat Ini</label>
+            <input type="text" class="form-control" 
+              value="<%= getStatusDisplay(pesanan.Status.nama_status) %>" 
+              disabled />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Update Status Ke</label>
+            <select class="form-select" name="status" id="statusSelect" required>
+              <option value="">Pilih Status</option>
+            </select>
+            <small class="text-muted">Status hanya bisa diubah sesuai alur proses</small>
+          </div>
+
+          <!-- Estimasi Selesai -->
+          <div class="mb-3" id="estimasiField" style="display: none">
+            <label class="form-label">Estimasi Selesai</label>
+            <input type="date" class="form-control" name="estimasi_selesai"
+                   min="<%= new Date().toISOString().split('T')[0] %>"
+                   value="<%= pesanan.estimasi_selesai ? formatDateValue(pesanan.estimasi_selesai) : '' %>" />
+            <small class="text-muted">Isi estimasi selesai jika status diubah ke Diproses</small>
+          </div>
+
+          <!-- Alasan/Catatan -->
+          <div class="mb-3">
+            <label class="form-label">Alasan Perubahan Status <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="catatan" rows="2" required
+                      placeholder="Berikan alasan perubahan status"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="confirmStatusUpdate()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi -->
+<div class="modal fade" id="confirmationModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Perubahan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Anda yakin ingin mengubah status pesanan ini?</p>
+        <p class="mb-0 text-danger" id="warningText"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="saveStatus()">Ya, Ubah Status</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Image Preview -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview Gambar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <img src="" class="img-fluid w-100" id="previewImage" alt="Preview" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+  .table > :not(caption) > * > * {
+    padding: 0.75rem;
+  }
+  .bg-light {
+    background-color: #f8f9fa;
+  }
+
+  .img-thumbnail {
+    transition: transform 0.2s;
+  }
+
+  .img-thumbnail:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+
+  .table > tbody > tr > td {
+    vertical-align: middle;
+  }
+
+  .badge {
+    font-weight: normal;
+    padding: 0.5em 0.8em;
+  }
+
+  .placeholder-image {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 1rem;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  .timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 1.5rem;
+    height: calc(100% - 1rem);
+    border-left: 2px dashed #dee2e6;
+  }
+
+  .timeline-item::after {
+    content: "";
+    position: absolute;
+    left: -0.75rem;
+    top: 0.5rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #0d6efd;
+  }
+</style>
+
+<%- contentFor('scripts') %>
+<script src="/admin/js/pesanan/detail-pakaian.js"></script>

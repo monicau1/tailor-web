@@ -1,0 +1,392 @@
+<!-- views/customer/pages/layanan/pakaian/detail.ejs -->
+<div class="container pb-5">
+  <!-- Breadcrumb -->
+  <div class="row">
+    <div class="col-12 py-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item">
+            <a href="/pakaian">Katalog Pakaian</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <%= pakaian.nama_pakaian %>
+          </li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Gambar Pakaian -->
+    <div class="col-lg-5">
+      <div class="product-image-container mb-3">
+        <img
+          id="mainImage"
+          class="product-image"
+          src="<%= gambarUtama ? `/uploads/admin/produk-pakaian/${gambarUtama}` : 'https://placehold.co/800x600?text=' %>"
+          alt="<%= pakaian.nama_pakaian %>"
+        />
+        <% if (gambarLain && gambarLain.length > 0) { %>
+        <button class="nav-btn prev" onclick="changeImage(-1)">&lt;</button>
+        <button class="nav-btn next" onclick="changeImage(1)">&gt;</button>
+        <% } %>
+      </div>
+
+      <!-- Thumbnail Gallery -->
+      <% if (gambarUtama || (gambarLain && gambarLain.length > 0)) { %>
+      <div class="thumbnail-container">
+        <div class="thumbnail-wrapper">
+          <% if (gambarUtama) { %>
+          <img
+            src="/uploads/admin/produk-pakaian/<%= gambarUtama %>"
+            class="thumbnail active"
+            onclick="selectImage(this, 0)"
+            alt="Main Thumbnail"
+          />
+          <% } %> <% if (gambarLain && gambarLain.length > 0) { %> <%
+          gambarLain.forEach((gambar, index) => { %>
+          <img
+            src="/uploads/admin/produk-pakaian/<%= gambar %>"
+            class="thumbnail"
+            onclick="selectImage(this, <%= index + 1 %>)"
+            alt="Thumbnail <%= index + 1 %>"
+          />
+          <% }) %> <% } %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Informasi Pakaian -->
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="h2"><%= pakaian.nama_pakaian %></h1>
+          <p class="h3 py-2">Rp <%= pakaian.harga.toLocaleString('id-ID') %></p>
+
+          <% if(pakaian.deskripsi_pakaian) { %>
+          <p class="py-2"><%= pakaian.deskripsi_pakaian %></p>
+          <% } %>
+
+          <form
+            action="/pakaian/add-to-cart/<%= pakaian.id_pakaian %>"
+            method="POST"
+            class="mt-4"
+          >
+            <!-- Ukuran & Warna -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Ukuran</label>
+                <select
+                  name="ukuran"
+                  class="form-select"
+                  id="ukuranSelect"
+                  required
+                >
+                  <option value="">Pilih Ukuran</option>
+                  <% let ukuranList = []; if(pakaian.VarianPakaian &&
+                  pakaian.VarianPakaian.length > 0) { ukuranList = [...new Set(
+                  pakaian.VarianPakaian .filter(function(v) { return v.stok > 0;
+                  }) .map(function(v) { return v.ukuran; }) )];
+                  ukuranList.sort(); } ukuranList.forEach(function(ukuran) { %>
+                  <option value="<%= ukuran %>"><%= ukuran %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Warna</label>
+                <select
+                  name="warna"
+                  class="form-select"
+                  id="warnaSelect"
+                  required
+                  disabled
+                >
+                  <option value="">Pilih Warna</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quantity -->
+            <div class="mb-3">
+              <label class="form-label">Jumlah:</label>
+              <div class="input-group w-25">
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  onclick="updateQuantity(-1)"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  class="form-control text-center"
+                  name="quantity"
+                  value="1"
+                  min="1"
+                  max="99"
+                  required
+                  id="quantityInput"
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  onclick="updateQuantity(1)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <!-- Catatan -->
+            <div class="mb-3">
+              <label class="form-label">Catatan:</label>
+              <textarea
+                class="form-control"
+                name="catatan"
+                rows="3"
+                placeholder="Tambahkan catatan untuk pesanan Anda (opsional)"
+              ></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="row pb-3">
+              <div class="col d-grid">
+                <button
+                  type="submit"
+                  class="btn btn-success btn-lg"
+                  id="submitButton"
+                >
+                  Tambah ke Keranjang
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-image-container {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 500px;
+    object-fit: contain;
+  }
+
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 16px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .product-image-container:hover .nav-btn {
+    opacity: 1;
+  }
+
+  .prev {
+    left: 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .next {
+    right: 0;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .thumbnail-container {
+    margin-top: 10px;
+    padding: 0 25px;
+  }
+
+  .thumbnail-wrapper {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .thumbnail-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .thumbnail:hover {
+    opacity: 0.8;
+  }
+
+  .thumbnail.active {
+    border-color: #198754;
+  }
+
+  .breadcrumb {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+  }
+
+  .btn-success {
+    transition: all 0.3s;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Definisikan variabel
+    let currentImageIndex = 0;
+    const images = [];
+
+    // Dapatkan data gambar
+    <% if (gambarUtama) { %>
+      images.push('<%= gambarUtama %>');
+    <% } %>
+
+    <% if (gambarLain && gambarLain.length > 0) { %>
+      images.push(...<%- JSON.stringify(gambarLain) %>);
+    <% } %>
+
+    // Dapatkan data varian
+    const variants = <%- JSON.stringify(pakaian.VarianPakaian || []) %>;
+
+    // Fungsi untuk gambar
+    window.selectImage = function(thumb, index) {
+      document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+      currentImageIndex = index;
+      updateMainImage();
+    }
+
+    window.changeImage = function(direction) {
+      currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
+      updateMainImage();
+      updateThumbnails();
+    }
+
+    function updateMainImage() {
+      const mainImg = document.getElementById('mainImage');
+      if (mainImg && images[currentImageIndex]) {
+        mainImg.src = `/uploads/admin/produk-pakaian/${images[currentImageIndex]}`;
+      }
+    }
+
+    function updateThumbnails() {
+      document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+        thumb.classList.toggle('active', index === currentImageIndex);
+      });
+    }
+
+    // Event handlers untuk form
+    const ukuranSelect = document.getElementById('ukuranSelect');
+    const warnaSelect = document.getElementById('warnaSelect');
+    const quantityInput = document.getElementById('quantityInput');
+    const submitButton = document.getElementById('submitButton');
+
+    // Handler untuk perubahan ukuran
+    ukuranSelect.addEventListener('change', function() {
+      const selectedSize = this.value;
+      warnaSelect.innerHTML = '<option value="">Pilih Warna</option>';
+
+      if (selectedSize) {
+        const availableColors = variants
+          .filter(function(v) { return v.ukuran === selectedSize && v.stok > 0; })
+          .map(function(v) { return v.warna; });
+
+        Array.from(new Set(availableColors)).sort().forEach(function(warna) {
+          warnaSelect.add(new Option(warna, warna));
+        });
+
+        warnaSelect.disabled = false;
+      } else {
+        warnaSelect.disabled = true;
+      }
+
+      updateMaxQuantity();
+    });
+
+    // Handler untuk perubahan warna
+    warnaSelect.addEventListener('change', function() {
+      updateMaxQuantity();
+    });
+
+    // Fungsi update quantity
+    window.updateQuantity = function(change) {
+      const currentVal = parseInt(quantityInput.value) || 1;
+      const maxVal = parseInt(quantityInput.getAttribute('max')) || 99;
+      const newVal = Math.min(Math.max(1, currentVal + change), maxVal);
+      quantityInput.value = newVal;
+    }
+
+    // Fungsi update max quantity berdasarkan stok
+    function updateMaxQuantity() {
+      const selectedSize = ukuranSelect.value;
+      const selectedColor = warnaSelect.value;
+
+      if (selectedSize && selectedColor) {
+        const variant = variants.find(v =>
+          v.ukuran === selectedSize && v.warna === selectedColor
+        );
+
+        if (variant) {
+          quantityInput.max = variant.stok;
+          if (parseInt(quantityInput.value) > variant.stok) {
+            quantityInput.value = variant.stok;
+          }
+        }
+      }
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const selectedSize = ukuranSelect.value;
+      const selectedColor = warnaSelect.value;
+
+      if (!selectedSize || !selectedColor) {
+        e.preventDefault();
+        alert('Silakan pilih ukuran dan warna');
+        return;
+      }
+
+      const variant = variants.find(v =>
+        v.ukuran === selectedSize && v.warna === selectedColor
+      );
+
+      const quantity = parseInt(quantityInput.value);
+      if (variant && quantity > variant.stok) {
+        e.preventDefault();
+        alert(`Stok tidak mencukupi. Stok tersedia: ${variant.stok}`);
+      }
+    });
+  });
+</script>

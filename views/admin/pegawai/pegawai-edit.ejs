@@ -1,0 +1,261 @@
+<!-- views/admin/pegawai/pegawai-edit.ejs -->
+<div class="content flex-grow-1">
+  <div class="container">
+    <div class="header mb-4">
+      <a href="/admin/pegawai" class="text-decoration-none">
+        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pegawai
+      </a>
+      <h1 class="mt-2">Edit Pegawai</h1>
+    </div>
+
+    <!-- Alert untuk notifikasi -->
+    <div id="alertContainer">
+      <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error %>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Form edit pegawai -->
+    <form id="pegawaiForm" class="card">
+      <input type="hidden" id="pegawaiId" value="<%= pegawai.id_pegawai %>" />
+
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="namaPegawai" class="form-label">Nama Pegawai*</label>
+            <input
+              type="text"
+              class="form-control"
+              id="namaPegawai"
+              name="nama_pegawai"
+              value="<%= pegawai.nama_pegawai %>"
+              required
+              minlength="3"
+              maxlength="100"
+            />
+            <div class="invalid-feedback">
+              Nama pegawai harus diisi (3-100 karakter)
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="emailPegawai" class="form-label">Email*</label>
+            <input
+              type="email"
+              class="form-control"
+              id="emailPegawai"
+              name="email_pegawai"
+              value="<%= pegawai.email_pegawai %>"
+              required
+            />
+            <div class="invalid-feedback">Masukkan format email yang valid</div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="passwordPegawai" class="form-label"
+              >Password Baru</label
+            >
+            <input
+              type="password"
+              class="form-control"
+              id="passwordPegawai"
+              name="password_pegawai"
+              minlength="6"
+            />
+            <div class="form-text">
+              Kosongkan jika tidak ingin mengubah password
+            </div>
+            <div class="invalid-feedback">Password minimal 6 karakter</div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="nomorTelepon" class="form-label">Nomor Telepon*</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="nomorTelepon"
+              name="nomor_telepon_pegawai"
+              value="<%= pegawai.nomor_telepon_pegawai %>"
+              required
+              pattern="^[0-9+\-\s()]*$"
+              minlength="10"
+              maxlength="15"
+            />
+            <div class="invalid-feedback">
+              Nomor telepon harus valid (10-15 digit)
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label for="tanggalMasuk" class="form-label">Tanggal Masuk*</label>
+            <input
+              type="date"
+              class="form-control"
+              id="tanggalMasuk"
+              name="tanggal_masuk_pegawai"
+              value="<%= pegawai.tanggal_masuk_pegawai ? pegawai.tanggal_masuk_pegawai.toISOString().split('T')[0] : '' %>"
+              required
+              max="<%= new Date().toISOString().split('T')[0] %>"
+            />
+            <div class="invalid-feedback">
+              Tanggal masuk tidak boleh di masa depan
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="d-flex justify-content-between">
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="confirmDelete()"
+          >
+            <i class="fas fa-trash me-1"></i> Hapus
+          </button>
+          <div class="d-flex gap-2">
+            <a href="/admin/pegawai" class="btn btn-secondary">
+              <i class="fas fa-times me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-save me-1"></i> Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal Konfirmasi Hapus -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Konfirmasi Hapus</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>Apakah Anda yakin ingin menghapus pegawai ini?</p>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="deletePegawai()"
+          >
+            Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('scripts') %>
+<script>
+  // Handle form submission
+  document
+    .getElementById("pegawaiForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const pegawaiId = document.getElementById("pegawaiId").value;
+      const formData = {
+        nama_pegawai: document.getElementById("namaPegawai").value,
+        email_pegawai: document.getElementById("emailPegawai").value,
+        password_pegawai: document.getElementById("passwordPegawai").value,
+        nomor_telepon_pegawai: document.getElementById("nomorTelepon").value,
+        tanggal_masuk_pegawai: document.getElementById("tanggalMasuk").value,
+      };
+
+      try {
+        console.log("Mengirim update data:", formData);
+
+        const response = await fetch(`/admin/pegawai/${pegawaiId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+        console.log("Response update:", data);
+
+        if (data.status === "success") {
+          window.location.href = "/admin/pegawai";
+        } else {
+          showAlert("error", data.message);
+        }
+      } catch (error) {
+        console.error("Error update:", error);
+        showAlert("error", "Terjadi kesalahan saat memperbarui data");
+      }
+    });
+
+  // Function untuk menampilkan modal konfirmasi delete
+  function confirmDelete() {
+    const modal = new bootstrap.Modal(
+      document.getElementById("deleteConfirmModal")
+    );
+    modal.show();
+  }
+
+  async function deletePegawai() {
+    const pegawaiId = document.getElementById("pegawaiId").value;
+
+    try {
+      const response = await fetch(`/admin/pegawai/${pegawaiId}`, {
+        method: "DELETE",
+        credentials: "same-origin", // Tambahkan ini
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log("Response delete:", data); // Tambahkan log
+
+      if (data.status === "success") {
+        window.location.href = "/admin/pegawai";
+      } else {
+        showAlert("error", data.message);
+      }
+    } catch (error) {
+      console.error("Error delete:", error);
+      showAlert("error", "Terjadi kesalahan saat menghapus data");
+    }
+  }
+
+  // Function untuk menampilkan alert
+  function showAlert(type, message) {
+    const alertContainer = document.getElementById("alertContainer");
+    const alertClass = type === "error" ? "danger" : "success";
+
+    alertContainer.innerHTML = `
+    <div class="alert alert-${alertClass} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+  }
+</script>

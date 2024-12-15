@@ -1,0 +1,344 @@
+<!-- views/customer/pages/checkout/jahit.ejs (ini dari website pelanggan bukan admin)-->
+<div class="container py-5">
+  <div class="row">
+    <!-- Form Checkout -->
+    <div class="col-md-8">
+      <form action="/checkout/jahit" method="POST" id="checkoutForm">
+        <!-- Alamat Pengiriman -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Alamat Pengiriman</h5>
+            <p class="text-muted small">
+              Pilih alamat untuk pengiriman pakaian yang sudah selesai
+            </p>
+
+            <% if(alamatPelanggan && alamatPelanggan.length > 0) { %> <%
+            alamatPelanggan.forEach(alamat => { %>
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="id_alamat_pelanggan"
+                    value="<%= alamat.id_alamat_pelanggan %>"
+                    data-area="<%= alamat.area_code %>"
+                    data-cost="<%= shippingAreas[alamat.area_code]?.cost || 0 %>"
+                    required
+                    id="alamat_<%= alamat.id_alamat_pelanggan %>"
+                  />
+                  <label
+                    class="form-check-label"
+                    for="alamat_<%= alamat.id_alamat_pelanggan %>"
+                  >
+                    <div class="ms-2">
+                      <strong class="d-block mb-1"
+                        ><%= alamat.alamat_jalan %></strong
+                      >
+                      <span class="d-block text-muted"
+                        ><%= alamat.kecamatan %>, <%= alamat.provinsi %></span
+                      >
+                      <span class="d-block text-muted"
+                        >Kode Pos: <%= alamat.kode_pos %></span
+                      >
+                      <% if(shippingAreas[alamat.area_code]) { %>
+                      <span class="badge bg-info mt-2">
+                        Area: <%= shippingAreas[alamat.area_code].name %> - Rp
+                        <%=
+                        shippingAreas[alamat.area_code].cost.toLocaleString('id-ID')
+                        %>
+                      </span>
+                      <% } %>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <% }) %> <% } else { %>
+            <div class="alert alert-warning">
+              <p class="mb-2">Anda belum memiliki alamat tersimpan.</p>
+              <a
+                href="/profile/alamat/tambah?redirect=checkout"
+                class="btn btn-warning btn-sm"
+              >
+                <i class="fas fa-plus me-1"></i>Tambah Alamat
+              </a>
+            </div>
+            <% } %>
+
+            <div class="mt-3">
+              <a
+                href="/profile/alamat/tambah?redirect=checkout"
+                class="btn btn-outline-success"
+              >
+                <i class="fas fa-plus me-2"></i>Tambah Alamat Baru
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metode Pengiriman -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Metode Pengiriman</h5>
+
+            <div class="form-check mb-3">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="delivery_method"
+                id="selfPickup"
+                value="self_pickup"
+                required
+              />
+              <label class="form-check-label" for="selfPickup">
+                <strong>Ambil Sendiri di Toko</strong>
+                <div class="text-muted small">
+                  Anda dapat mengambil pesanan langsung di toko setelah selesai
+                </div>
+              </label>
+            </div>
+
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="delivery_method"
+                id="courier"
+                value="courier"
+                required
+              />
+              <label class="form-check-label" for="courier">
+                <strong>Kirim via Kurir</strong>
+                <div class="text-muted small">
+                  Pesanan akan dikirim ke alamat Anda
+                </div>
+              </label>
+            </div>
+
+            <div class="alert alert-light mt-3">
+              <strong
+                ><i class="fas fa-info-circle me-2"></i>Informasi
+                Pengiriman:</strong
+              >
+              <ul class="mt-2 mb-0 small">
+                <li>Estimasi pengerjaan: 3-5 hari kerja</li>
+                <li>Pengiriman 1-2 hari kerja setelah pesanan selesai</li>
+                <li>
+                  Kami akan menghubungi Anda melalui WhatsApp untuk konfirmasi
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metode Pembayaran -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Metode Pembayaran</h5>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="metode_pembayaran"
+                value="transfer"
+                id="transferBank"
+                required
+              />
+              <label class="form-check-label" for="transferBank">
+                <strong>Transfer Bank</strong>
+                <div class="text-muted small">
+                  Transfer manual ke rekening BCA
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Catatan -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Catatan Pesanan (Opsional)</h5>
+            <textarea
+              class="form-control"
+              name="catatan_pesanan"
+              rows="2"
+              placeholder="Tambahkan catatan untuk pesanan Anda"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid">
+          <button
+            type="submit"
+            class="btn btn-success btn-lg"
+            id="btnSubmit"
+            disabled
+          >
+            Buat Pesanan
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Ringkasan Pesanan -->
+    <div class="col-md-4">
+      <div class="card sticky-top" style="top: 2rem">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Ringkasan Pesanan</h5>
+
+          <!-- Daftar Item -->
+          <% keranjang.ItemKeranjang.forEach(item => { %>
+          <div class="d-flex justify-content-between mb-3">
+            <div>
+              <h6 class="mb-1">
+                <%= item.VarianPakaian?.Pakaian?.nama_pakaian || 'Pakaian' %>
+              </h6>
+              <% if(item.catatan_item_pakaian) { %>
+              <div class="small text-muted mb-2">
+                <i class="fas fa-info-circle"></i> Catatan: <%=
+                item.catatan_item_pakaian %>
+              </div>
+              <% } %> <% if(item.UkuranKhusus) { %>
+              <div class="small text-muted">
+                <span class="d-block">Ukuran Khusus</span>
+                <span class="d-block"
+                  >Warna: <%= item.VarianPakaian?.warna || '-' %></span
+                >
+              </div>
+              <% } else { %>
+              <div class="small text-muted">
+                <span class="d-block"
+                  >Ukuran: <%= item.VarianPakaian?.ukuran || '-' %></span
+                >
+                <span class="d-block"
+                  >Warna: <%= item.VarianPakaian?.warna || '-' %></span
+                >
+              </div>
+              <% } %>
+              <small class="text-muted d-block mt-1"
+                >Jumlah: <%= item.kuantitas_pakaian %></small
+              >
+            </div>
+            <div class="text-end">
+              <span
+                >Rp <%= item.harga_per_item_pakaian.toLocaleString('id-ID')
+                %></span
+              >
+            </div>
+          </div>
+          <% }) %>
+
+          <hr />
+
+          <!-- Subtotal -->
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <span id="subtotal" data-value="<%= total %>">
+              Rp <%= total.toLocaleString('id-ID') %>
+            </span>
+          </div>
+
+          <!-- Ongkir -->
+          <div class="d-flex justify-content-between mb-2">
+            <span>Ongkos Kirim</span>
+            <span id="shippingCost">Rp 0</span>
+          </div>
+
+          <hr />
+
+          <!-- Total -->
+          <div class="d-flex justify-content-between">
+            <strong>Total Pembayaran</strong>
+            <strong id="grandTotal">
+              Rp <%= total.toLocaleString('id-ID') %>
+            </strong>
+          </div>
+
+          <!-- Info Pembayaran -->
+          <div class="alert alert-info mt-3 mb-0">
+            <h6 class="mb-2">Informasi Pembayaran:</h6>
+            <p class="small mb-0">
+              Setelah membuat pesanan, Anda akan diarahkan ke halaman pembayaran
+              untuk mengunggah bukti transfer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("checkoutForm");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const deliveryMethodInputs = document.querySelectorAll(
+      'input[name="delivery_method"]'
+    );
+    const alamatInputs = document.querySelectorAll(
+      'input[name="id_alamat_pelanggan"]'
+    );
+    const shippingCostDisplay = document.getElementById("shippingCost");
+    const grandTotalDisplay = document.getElementById("grandTotal");
+    const subtotal = parseInt(
+      document.getElementById("subtotal").dataset.value
+    );
+
+    function validateForm() {
+      const requiredFields = {
+        alamat: document.querySelector(
+          'input[name="id_alamat_pelanggan"]:checked'
+        ),
+        deliveryMethod: document.querySelector(
+          'input[name="delivery_method"]:checked'
+        ),
+        pembayaran: document.querySelector(
+          'input[name="metode_pembayaran"]:checked'
+        ),
+      };
+
+      return Object.values(requiredFields).every((field) => field !== null);
+    }
+
+    function updateTotal() {
+      const deliveryMethod = document.querySelector(
+        'input[name="delivery_method"]:checked'
+      )?.value;
+      const selectedAddress = document.querySelector(
+        'input[name="id_alamat_pelanggan"]:checked'
+      );
+      let shippingCost = 0;
+
+      if (deliveryMethod === "courier" && selectedAddress) {
+        shippingCost = parseInt(selectedAddress.dataset.cost) || 0;
+      }
+
+      shippingCostDisplay.textContent =
+        shippingCost > 0
+          ? `Rp ${shippingCost.toLocaleString("id-ID")}`
+          : "Rp 0";
+
+      const grandTotal = subtotal + shippingCost;
+      grandTotalDisplay.textContent = `Rp ${grandTotal.toLocaleString(
+        "id-ID"
+      )}`;
+    }
+
+    // Event listeners
+    form.addEventListener("change", function () {
+      btnSubmit.disabled = !validateForm();
+      updateTotal();
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (validateForm()) {
+        this.submit();
+      } else {
+        alert("Mohon lengkapi semua informasi yang diperlukan");
+      }
+    });
+  });
+</script>

@@ -1,0 +1,83 @@
+<!-- views/customer/pages/auth/login.ejs -->
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="text-center mb-4">Login</h2>
+
+          <% if(messages.error) { %>
+          <div class="alert alert-danger"><%= messages.error %></div>
+          <% } %> <% if(messages.success) { %>
+          <div class="alert alert-success"><%= messages.success %></div>
+          <% } %>
+
+          <form action="/auth/login" method="POST">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                placeholder="Masukkan email"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                placeholder="Masukkan password"
+                required
+              />
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+              </button>
+            </div>
+          </form>
+
+          <div class="mb-3 text-end">
+            <a href="/auth/forgot-password" class="text-decoration-none"
+              >Lupa Password?</a
+            >
+          </div>
+
+          <div class="text-center mt-4">
+            <p class="mb-0">
+              Belum punya akun?
+              <a href="/auth/register" class="text-primary">Daftar di sini</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  .btn-primary {
+    padding: 0.8rem;
+    font-weight: 500;
+  }
+
+  .alert {
+    margin-bottom: 1.5rem;
+  }
+</style>

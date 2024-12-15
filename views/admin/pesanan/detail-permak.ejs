@@ -1,0 +1,581 @@
+<!-- views/admin/pesanan/detail-permak.ejs -->
+
+<div class="container-fluid py-4">
+  <!-- Header Invoice-like -->
+  <div class="card">
+    <div class="card-body">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+          <h4>Detail Pesanan #<%= pesanan.id_pesanan %></h4>
+          <p class="text-muted mb-0">
+            Tanggal Pesanan: <%= formatDate(pesanan.tanggal_pesanan) %>
+          </p>
+        </div>
+        <div class="text-end">
+          <div class="mb-2">
+            <span class="badge bg-<%= getStatusColor(pesanan.Status.nama_status) %> fs-6">
+              <%= getStatusDisplay(pesanan.Status.nama_status) %>
+            </span>
+          </div>
+          <button class="btn btn-sm btn-primary mt-2" onclick="updateStatus()">
+            Update Status
+          </button>
+        </div>
+      </div>
+
+      <!-- Info Pelanggan & Pengiriman -->
+      <div class="row mb-4">
+        <!-- Informasi Pelanggan -->
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="text-muted mb-3">Informasi Pelanggan:</h6>
+            <p class="mb-1">
+              <strong><%= pesanan.PelangganPesanan?.nama_pelanggan %></strong>
+            </p>
+            <p class="mb-1">
+              <i class="fas fa-phone me-1"></i>
+              <%= pesanan.PelangganPesanan?.nomor_telepon_pelanggan || '-' %>
+            </p>
+            <p class="mb-0">
+              <i class="fas fa-envelope me-1"></i>
+              <%= pesanan.PelangganPesanan?.email_pelanggan || '-' %>
+            </p>
+          </div>
+        </div>
+
+       
+
+        <!-- Informasi Pengiriman -->
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="text-muted mb-3">Informasi Pengiriman:</h6>
+
+            <!-- Penjemputan -->
+            <div class="mb-3">
+              <div class="d-flex align-items-center mb-2">
+                <strong class="me-2">Penjemputan:</strong>
+                <span class="badge <%= pesanan.Pengiriman?.metode_pengiriman === 'self_dropoff' ? 'bg-info' : 'bg-primary' %>">
+                  <%= pesanan.Pengiriman?.metode_pengiriman === 'self_dropoff' ? 'Antar ke Toko' : 'Dijemput Kurir' %>
+                </span>
+              </div>
+              
+              <% if (pesanan.Pengiriman?.metode_pengiriman !== 'self_dropoff') { %>
+                <div class="ps-3 border-start">
+                  <small class="text-muted">Alamat Penjemputan:</small>
+                  <p class="mb-1"><%= pesanan.Pengiriman.AlamatPickup?.alamat_jalan || '-' %></p>
+                  <p class="mb-0">
+                    <%= pesanan.Pengiriman.AlamatPickup?.kecamatan || '-' %>, 
+                    <%= pesanan.Pengiriman.AlamatPickup?.provinsi || '-' %>
+                    (<%= pesanan.Pengiriman.AlamatPickup?.kode_pos || '-' %>)
+                  </p>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Pengantaran -->
+            <div>
+              <div class="d-flex align-items-center mb-2">
+                <strong class="me-2">Pengantaran:</strong>
+                <span class="badge <%= pesanan.Pengiriman?.metode_pengembalian === 'self_pickup' ? 'bg-info' : 'bg-primary' %>">
+                  <%= pesanan.Pengiriman?.metode_pengembalian === 'self_pickup' ? 'Ambil di Toko' : 'Diantar Kurir' %>
+                </span>
+              </div>
+
+              <% if (pesanan.Pengiriman?.metode_pengembalian !== 'self_pickup') { %>
+                <div class="ps-3 border-start">
+                  <small class="text-muted">Alamat Pengantaran:</small>
+                  <p class="mb-1"><%= pesanan.Pengiriman.AlamatReturn?.alamat_jalan || '-' %></p>
+                  <p class="mb-0">
+                    <%= pesanan.Pengiriman.AlamatReturn?.kecamatan || '-' %>, 
+                    <%= pesanan.Pengiriman.AlamatReturn?.provinsi || '-' %>
+                    (<%= pesanan.Pengiriman.AlamatReturn?.kode_pos || '-' %>)
+                  </p>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <% if (pesanan.jenis_layanan === 'permak' && pesanan.Status.nama_status === 'diproses') { %>
+        <div class="mb-3">
+          <strong>Penjahit:</strong>
+          <%= pesanan.nama_penjahit || 'Belum ditentukan' %>
+        </div>
+      <% } %>
+      <!-- Tabel Item -->
+      <div class="table-responsive mb-4">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 100px">Foto</th>
+              <th>Kategori</th>
+              <th>Deskripsi Pakaian</th>
+              <th>Jenis Permak</th>
+              <th>Instruksi</th>
+              <th class="text-end">Harga</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% pesanan.PesananPermak.forEach(permak => { %>
+              <tr>
+                <!-- Foto Item -->
+                <td>
+                  <% if(permak.gambar_permak) { %>
+                    <img 
+                      src="/uploads/pelanggan/pesanan/permak/<%= permak.gambar_permak %>"
+                      class="img-thumbnail cursor-pointer"
+                      onclick="viewImage(this.src)"
+                      alt="Foto Item Permak"
+                      style="width: 80px; height: 80px; object-fit: cover"
+                    />
+                  <% } else { %>
+                    <div class="placeholder-image">
+                      <i class="fas fa-tshirt text-muted"></i>
+                    </div>
+                  <% } %>
+                </td>
+
+                <!-- Kategori -->
+                <td>
+                  <span class="badge bg-light text-dark">
+                    <%= permak.KategoriPermak?.nama_kategori_permak %>
+                  </span>
+                </td>
+
+                <!-- Deskripsi -->
+                <td>
+                  <p class="mb-0"><%= permak.deskripsi_pakaian %></p>
+                </td>
+
+                <!-- Detail Permak -->
+                <td>
+                  <% if (permak.DetailPermak?.length > 0) { %>
+                    <ul class="list-unstyled mb-0">
+                      <% permak.DetailPermak.forEach(detail => { %>
+                        <li class="mb-2">
+                          <div class="d-flex justify-content-between">
+                            <span><%= detail.JenisPermak?.nama_permak %></span>
+                            <small class="text-muted ms-2">
+                              Rp <%= formatNumber(detail.harga_per_item) %> × <%= detail.kuantitas %>
+                            </small>
+                          </div>
+                        </li>
+                      <% }) %>
+                    </ul>
+                  <% } %>
+                </td>
+
+                <!-- Instruksi -->
+                <td style="min-width: 250px">
+                  <% permak.DetailPermak?.forEach((detail, index) => { %>
+                    <% if (detail.InstruksiPermak) { %>
+                      <div class="<%= index > 0 ? 'border-top pt-2 mt-2' : '' %>">
+                        <!-- Judul Jenis Permak -->
+                        <div class="fw-bold mb-2">
+                          <%= detail.JenisPermak?.nama_permak %>
+                        </div>
+                        
+                        <!-- Box Instruksi -->
+                        <div class="bg-light p-2 rounded">
+                          <% if (detail.InstruksiPermak.tipe_instruksi === 'alterasi') { %>
+                            <!-- Instruksi Alterasi -->
+                            <% if (detail.InstruksiPermak.catatan_perubahan) { %>
+                              <div class="mb-2">
+                                <span class="text-muted fw-semibold">Perubahan:</span>
+                                <div class="text-wrap"><%= detail.InstruksiPermak.catatan_perubahan %></div>
+                              </div>
+                            <% } %>
+                          <% } else if (detail.InstruksiPermak.tipe_instruksi === 'perbaikan') { %>
+                            <!-- Instruksi Perbaikan -->
+                            <% if (detail.InstruksiPermak.lokasi_perbaikan) { %>
+                              <div class="mb-2">
+                                <span class="text-muted fw-semibold">Lokasi:</span>
+                                <div class="text-wrap"><%= detail.InstruksiPermak.lokasi_perbaikan %></div>
+                              </div>
+                            <% } %>
+                            <% if (detail.InstruksiPermak.deskripsi_perbaikan) { %>
+                              <div class="mb-2">
+                                <span class="text-muted fw-semibold">Deskripsi:</span>
+                                <div class="text-wrap"><%= detail.InstruksiPermak.deskripsi_perbaikan %></div>
+                              </div>
+                            <% } %>
+                          <% } %>
+
+                          <!-- Catatan Tambahan -->
+                          <% if (detail.InstruksiPermak.catatan_tambahan) { %>
+                            <div class="mt-2 pt-2 border-top">
+                              <span class="text-muted fw-semibold">Catatan:</span>
+                              <div class="text-wrap"><%= detail.InstruksiPermak.catatan_tambahan %></div>
+                            </div>
+                          <% } %>
+                        </div>
+                      </div>
+                    <% } %>
+                  <% }) %>
+                </td>
+               
+
+                <!-- Total Harga -->
+                <td class="text-end">
+                  <% const totalHargaPermak = permak.DetailPermak?.reduce((total, detail) => {
+                    return total + (detail.harga_per_item * detail.kuantitas)
+                  }, 0) || 0 %>
+                  <strong>Rp <%= formatNumber(totalHargaPermak) %></strong>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+          
+
+          <tfoot class="table-light">
+            <!-- Subtotal -->
+            <tr>
+              <td colspan="5" class="text-end"><strong>Subtotal</strong></td>
+              <td class="text-end">
+                <% const subtotal = pesanan.PesananPermak.reduce((total, permak) => {
+                    const detailTotal = permak.DetailPermak?.reduce((subTotal, detail) => {
+                      return subTotal + (detail.harga_per_item * detail.kuantitas);
+                    }, 0) || 0;
+                    return total + detailTotal;
+                  }, 0); 
+                %>
+                <strong>Rp <%= formatNumber(subtotal) %></strong>
+              </td>
+            </tr>
+
+            <!-- Biaya Pengiriman -->
+            <% if (pesanan.Pengiriman?.biaya_pengiriman > 0) { %>
+              <tr>
+                <td colspan="5" class="text-end">Biaya Penjemputan</td>
+                <td class="text-end">
+                  Rp <%= formatNumber(pesanan.Pengiriman.biaya_pengiriman) %>
+                </td>
+              </tr>
+            <% } %>
+
+            <!-- Biaya Pengembalian -->
+            <% if (pesanan.Pengiriman?.biaya_pengembalian > 0) { %>
+              <tr>
+                <td colspan="5" class="text-end">Biaya Pengantaran</td>
+                <td class="text-end">
+                  Rp <%= formatNumber(pesanan.Pengiriman.biaya_pengembalian) %>
+                </td>
+              </tr>
+            <% } %>
+
+            <!-- Total -->
+            <tr>
+              <td colspan="5" class="text-end"><strong>Total</strong></td>
+              <td class="text-end">
+                <h5 class="mb-0">
+                  Rp <%= formatNumber(pesanan.jumlah_total) %>
+                </h5>
+              </td>
+            </tr>
+          </tfoot>
+
+        </table>
+      </div>
+
+      <!-- Info Pembayaran & Status -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="mb-3">Informasi Pembayaran</h6>
+            <table class="table table-sm table-borderless mb-0">
+              <tr>
+                <td style="width: 150px">Status</td>
+                <td>
+                  : <span class="badge bg-<%= pesanan.Pembayaran?.status_pembayaran === 'paid' ? 'success' : 'warning' %>">
+                    <%= formatStatus(pesanan.Pembayaran?.status_pembayaran || 'pending') %>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <td>Metode</td>
+                <td>: <%= pesanan.Pembayaran?.metode_pembayaran || '-' %></td>
+              </tr>
+              <tr>
+                <td>Tanggal</td>
+                <td>
+                  : <%= pesanan.Pembayaran?.tanggal_pembayaran ?
+                    formatDateTime(pesanan.Pembayaran.tanggal_pembayaran) : '-' %>
+                </td>
+              </tr>
+              <% if (pesanan.Pembayaran?.bukti_pembayaran) { %>
+                <tr>
+                  <td>Bukti</td>
+                  <td>
+                    : <a href="#" onclick="validatePayment('/uploads/pelanggan/pembayaran/<%= pesanan.Pembayaran.bukti_pembayaran %>')">
+                        Lihat & Validasi Bukti
+                      </a>
+                  </td>
+                </tr>
+              <% } %>
+            </table>
+            
+            <% if (pesanan.Pembayaran?.status_pembayaran === 'pending' && pesanan.Pembayaran?.bukti_pembayaran) { %>
+              <button class="btn btn-sm btn-warning mt-3"
+                onclick="validatePayment('/uploads/pelanggan/pembayaran/<%= pesanan.Pembayaran.bukti_pembayaran %>')">
+                Validasi Pembayaran
+              </button>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="border rounded p-3">
+            <h6 class="mb-3">Riwayat Status</h6>
+            <div class="timeline">
+
+              <% pesanan.RiwayatStatus?.sort((a, b) => new Date(b.tanggal_status) - new Date(a.tanggal_status)).forEach(riwayat => { %>
+                <div class="timeline-item mb-3">
+                  <div class="d-flex">
+                    <div class="flex-shrink-0">
+                      <span class="badge bg-<%= getStatusColor(riwayat.StatusRiwayat.nama_status) %>">
+                        <%= getStatusDisplay(riwayat.StatusRiwayat.nama_status) %>
+                      </span>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <small class="text-muted d-block">
+                        <%= formatDateTime(riwayat.tanggal_status) %>
+                      </small>
+                      <% if (riwayat.keterangan) { %>
+                        <small class="text-muted"><%= riwayat.keterangan %></small>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="text-end mt-3">
+    <a href="/admin/pesanan" class="btn btn-outline-secondary me-2">
+      <i class="fas fa-arrow-left"></i> Kembali
+    </a>
+    <button class="btn btn-primary" onclick="printOrder()">
+      <i class="fas fa-print"></i> Cetak
+    </button>
+  </div>
+</div>
+
+<!-- Modal Validasi Pembayaran -->
+<div class="modal fade" id="paymentValidationModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Validasi Pembayaran</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Preview Bukti -->
+        <div class="text-center mb-3">
+          <img 
+            id="paymentProofPreview" 
+            src="" 
+            class="img-fluid mb-3" 
+            alt="Bukti Pembayaran"
+            style="max-height: 400px"
+          >
+        </div>
+        
+        <!-- Form Validasi -->
+        <form id="paymentValidationForm">
+          <input type="hidden" name="id_pesanan" value="<%= pesanan.id_pesanan %>">
+          
+          <div class="mb-3">
+            <label class="form-label">Status Pembayaran</label>
+            <select class="form-select" name="status_pembayaran" required>
+              <option value="pending" <%= pesanan.Pembayaran?.status_pembayaran === 'pending' ? 'selected' : '' %>>Menunggu Verifikasi</option>
+              <option value="paid" <%= pesanan.Pembayaran?.status_pembayaran === 'paid' ? 'selected' : '' %>>Valid & Diterima</option>
+              <option value="failed" <%= pesanan.Pembayaran?.status_pembayaran === 'failed' ? 'selected' : '' %>>Tidak Valid/Ditolak</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Catatan Validasi</label>
+            <textarea class="form-control" name="catatan" rows="3" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" onclick="savePaymentValidation()">Simpan Validasi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Update Status -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Update Status Pesanan #<%= pesanan.id_pesanan %>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="updateStatusForm">
+          <input type="hidden" name="pesananId" value="<%= pesanan.id_pesanan %>" />
+          <input type="hidden" name="currentStatus" value="<%= pesanan.Status.nama_status %>" />
+
+          <!-- Status Selection -->
+          <div class="mb-3">
+            <label class="form-label">Status Saat Ini</label>
+            <input type="text" class="form-control" 
+              value="<%= getStatusDisplay(pesanan.Status.nama_status) %>" 
+              disabled />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Update Status Ke</label>
+            <select class="form-select" name="status" id="statusSelect" required>
+              <option value="">Pilih Status</option>
+            </select>
+            <small class="text-muted">Status hanya bisa diubah sesuai alur proses</small>
+          </div>
+
+          <!-- Estimasi Selesai -->
+          <div class="mb-3" id="estimasiField" style="display: none">
+            <label class="form-label">Estimasi Selesai</label>
+            <input type="date" class="form-control" name="estimasi_selesai"
+                   min="<%= new Date().toISOString().split('T')[0] %>"
+                   value="<%= pesanan.estimasi_selesai ? formatDateValue(pesanan.estimasi_selesai) : '' %>" />
+            <small class="text-muted">Isi estimasi selesai jika status diubah ke Diproses</small>
+          </div>
+
+          <div class="mb-3" id="penjahitField" style="display: none">
+            <label class="form-label">Nama Penjahit</label>
+            <input type="text" class="form-control" name="nama_penjahit" 
+                  value="<%= pesanan.nama_penjahit || '' %>"
+                  placeholder="Masukkan nama penjahit"/>
+            <small class="text-muted">Isi nama penjahit yang menangani permak ini</small>
+          </div>
+
+          <!-- Alasan/Catatan -->
+          <div class="mb-3">
+            <label class="form-label">Alasan Perubahan Status <span class="text-danger">*</span></label>
+            <textarea class="form-control" name="catatan" rows="2" required
+                      placeholder="Berikan alasan perubahan status"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="confirmStatusUpdate()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi -->
+<div class="modal fade" id="confirmationModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Perubahan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Anda yakin ingin mengubah status pesanan ini?</p>
+        <p class="mb-0 text-danger" id="warningText"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="saveStatus()">Ya, Ubah Status</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Image Preview -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Preview Gambar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <img src="" class="img-fluid w-100" id="previewImage" alt="Preview" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+  .table > :not(caption) > * > * {
+    padding: 0.75rem;
+  }
+  .bg-light {
+    background-color: #f8f9fa;
+  }
+
+  .img-thumbnail {
+    transition: transform 0.2s;
+  }
+
+  .img-thumbnail:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+
+  .table > tbody > tr > td {
+    vertical-align: middle;
+  }
+
+  .badge {
+    font-weight: normal;
+    padding: 0.5em 0.8em;
+  }
+
+  .placeholder-image {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 1rem;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  .timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: -0.5rem;
+    top: 1.5rem;
+    height: calc(100% - 1rem);
+    border-left: 2px dashed #dee2e6;
+  }
+
+  .timeline-item::after {
+    content: "";
+    position: absolute;
+    left: -0.75rem;
+    top: 0.5rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #0d6efd;
+  }
+</style>
+
+<%- contentFor('scripts') %>
+<script src="/admin/js/pesanan/detail-permak.js"></script>

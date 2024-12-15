@@ -1,0 +1,255 @@
+<!-- views/customer/contact.ejs -->
+<div class="container-fluid bg-light py-5">
+  <div class="col-md-6 m-auto text-center">
+    <h1 class="h1">Hubungi Kami</h1>
+    <p>Ada pertanyaan atau butuh bantuan? Kami siap membantu Anda</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Informasi Kontak Cards -->
+    <div class="col-12 mb-5">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="card h-100 contact-card">
+            <div class="card-body text-center py-4">
+              <div class="contact-icon mb-3">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <h5 class="card-title">Kunjungi Toko Kami</h5>
+              <p class="card-text mb-0">
+                Pasar Palm Paradise, Jl. Pegadungan Raya No. 2, Kecamatan
+                Kalideres
+              </p>
+              <p class="card-text">
+                Kota Jakarta Barat, Provinsi DKI Jakarta, Indonesia, 11830.
+              </p>
+
+              <a
+                href="https://maps.google.com"
+                target="_blank"
+                class="btn btn-outline-success btn-sm mt-2"
+              >
+                <i class="fas fa-directions me-1"></i>Petunjuk Arah
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card h-100 contact-card">
+            <div class="card-body text-center py-4">
+              <div class="contact-icon mb-3">
+                <i class="fab fa-whatsapp"></i>
+              </div>
+              <h5 class="card-title">WhatsApp</h5>
+              <p class="card-text">Konsultasi langsung via WhatsApp</p>
+              <p class="card-text small mb-3">Aktif: 09:00 - 20:00 WIB</p>
+              <a
+                href="https://wa.me/6281234567890"
+                target="_blank"
+                class="btn btn-success btn-sm"
+              >
+                <i class="fab fa-whatsapp me-1"></i>Chat Sekarang
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card h-100 contact-card">
+            <div class="card-body text-center py-4">
+              <div class="contact-icon mb-3">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <h5 class="card-title">Email</h5>
+              <p class="card-text">Kirim pertanyaan via email</p>
+              <a href="mailto:info@tokojahit.com" class="text-success"
+                >ahmaddjahit18@gmail.com</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jam Operasional -->
+    <div class="col-12 mb-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <h4 class="card-title mb-4">Jam Operasional</h4>
+              <div class="operation-hours">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-danger"><strong>Senin</strong></span>
+                  <span class="text-danger">Tutup</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span><strong>Selasa - Minggu</strong></span>
+                  <span>09:00 - 14:00 WIB</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mt-4 mt-md-0">
+              <div class="alert alert-success mb-0">
+                <h6 class="alert-heading">
+                  <i class="fas fa-info-circle me-2"></i>Butuh Bantuan?
+                </h6>
+                <p class="mb-0 small">
+                  Kami siap membantu Anda dengan pertanyaan seputar layanan
+                  jahit dan permak. Silakan hubungi kami melalui WhatsApp atau
+                  kunjungi toko kami langsung.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Kontak dan Maps -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h4 class="card-title mb-4">Kirim Pesan</h4>
+          <form action="/contact/send" method="POST">
+            <div class="mb-3">
+              <label for="name" class="form-label">Nama Lengkap</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="subject" class="form-label">Subjek</label>
+              <input
+                type="text"
+                class="form-control"
+                id="subject"
+                name="subject"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="message" class="form-label">Pesan</label>
+              <textarea
+                class="form-control"
+                id="message"
+                name="message"
+                rows="5"
+                required
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+              <i class="fas fa-paper-plane me-2"></i>Kirim Pesan
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div class="map-container">
+            <iframe
+              src="https://maps.google.com/maps?q=-6.136863815028091,106.71275767190068&z=15&output=embed"
+              width="100%"
+              height="450"
+              style="border: 0"
+              allowfullscreen=""
+              loading="lazy"
+            >
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .contact-card {
+    border: none;
+    transition: transform 0.3s;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+
+  .contact-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .contact-icon {
+    width: 60px;
+    height: 60px;
+    background-color: #198754;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 24px;
+  }
+
+  .operation-hours {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .map-container {
+    position: relative;
+    overflow: hidden;
+    padding-top: 100%; /* Creates a 1:1 aspect ratio */
+  }
+
+  .map-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0.5rem;
+  }
+
+  .btn-success {
+    background-color: #198754;
+    border-color: #198754;
+  }
+
+  .btn-success:hover {
+    background-color: #157347;
+    border-color: #157347;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #198754;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .map-container {
+      padding-top: 75%; /* Adjusts aspect ratio for mobile */
+    }
+  }
+</style>

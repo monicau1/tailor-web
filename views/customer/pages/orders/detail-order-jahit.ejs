@@ -1,0 +1,535 @@
+<!-- views/customer/pages/orders/detail-order-jahit.ejs (ini dari website pelanggan bukan admin) -->
+<div class="container py-5">
+  <!-- Header Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h4 class="mb-1">Pesanan #<%= pesanan.id_pesanan %></h4>
+          <p class="text-muted mb-0">
+            <%= new Date(pesanan.tanggal_pesanan).toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'long', year: 'numeric' }) %>
+          </p>
+        </div>
+        <span
+          class="badge bg-<%= getStatusColor(pesanan.Status.nama_status) %>"
+        >
+          <%= formatStatus(pesanan.Status.nama_status) %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <% if(pesanan.Pembayaran?.status_pembayaran === 'expired') { %>
+  <div class="alert alert-danger">
+    <i class="fas fa-exclamation-circle me-2"></i>
+    Pembayaran telah kedaluwarsa. Pesanan dibatalkan.
+  </div>
+  <% } %>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Items Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Detail Pesanan Jahit</h5>
+
+          <!-- Setelah -->
+          <% if (pesanan.PesananPakaian) { %>
+          <div class="row">
+            <!-- Gambar Pakaian -->
+            <div class="col-md-3 mb-3 mb-md-0">
+              <%
+              if(pesanan.PesananPakaian.VarianPakaian?.Pakaian?.GambarPakaian?.[0])
+              { %>
+              <img
+                src="/uploads/admin/produk-pakaian/<%= pesanan.PesananPakaian.VarianPakaian.Pakaian.GambarPakaian[0].nama_file %>"
+                class="img-fluid rounded"
+                alt="<%= pesanan.PesananPakaian.VarianPakaian.Pakaian.nama_pakaian %>"
+                style="max-height: 200px; width: 100%; object-fit: cover"
+              />
+              <% } else { %>
+              <div
+                class="bg-light rounded d-flex align-items-center justify-content-center"
+                style="height: 200px"
+              >
+                <i class="fas fa-tshirt fa-3x text-muted"></i>
+              </div>
+              <% } %>
+            </div>
+
+            <!-- Detail Item -->
+            <div class="col-md-9">
+              <h5 class="mb-3">
+                <%= pesanan.PesananPakaian.VarianPakaian?.Pakaian?.nama_pakaian
+                || 'Pakaian' %>
+              </h5>
+
+              <!-- Informasi Ukuran -->
+              <div class="alert alert-light mb-3">
+                <div class="row g-2">
+                  <div class="col-6">
+                    <small class="d-block text-muted">Ukuran:</small>
+                    <span
+                      ><%= pesanan.PesananPakaian.VarianPakaian?.ukuran || '-'
+                      %></span
+                    >
+                  </div>
+                  <div class="col-6">
+                    <small class="d-block text-muted">Warna:</small>
+                    <span
+                      ><%= pesanan.PesananPakaian.VarianPakaian?.warna || '-'
+                      %></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- Catatan -->
+              <% if(pesanan.PesananPakaian.catatan) { %>
+              <div class="alert alert-light mb-3">
+                <small class="text-muted d-block">Catatan:</small>
+                <p class="mb-0"><%= pesanan.PesananPakaian.catatan %></p>
+              </div>
+              <% } %>
+
+              <!-- Harga dan Jumlah -->
+              <div
+                class="d-flex justify-content-between align-items-center mt-3"
+              >
+                <div>
+                  <h6 class="mb-0">
+                    Rp <%=
+                    pesanan.PesananPakaian.harga_per_item.toLocaleString('id-ID')
+                    %>
+                  </h6>
+                  <small class="text-muted"
+                    >Jumlah: <%= pesanan.PesananPakaian.kuantitas %></small
+                  >
+                </div>
+                <div class="text-end">
+                  <strong class="text-success">
+                    Rp <%= (pesanan.PesananPakaian.harga_per_item *
+                    pesanan.PesananPakaian.kuantitas).toLocaleString('id-ID') %>
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } else { %>
+          <div class="alert alert-info">
+            Tidak ada detail pesanan yang tersedia
+          </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Status Timeline -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Status Pesanan</h5>
+
+          <% if(pesanan.RiwayatStatus && pesanan.RiwayatStatus.length > 0) { %>
+          <div class="timeline">
+            <% pesanan.RiwayatStatus.forEach(riwayat => { %>
+            <div class="timeline-item">
+              <div
+                class="timeline-marker bg-<%= getStatusColor(riwayat.StatusRiwayat.nama_status) %>"
+              ></div>
+              <div class="timeline-content">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-1"
+                >
+                  <h6 class="mb-0">
+                    <%= formatStatus(riwayat.StatusRiwayat.nama_status) %>
+                  </h6>
+                  <small class="text-muted">
+                    <%= new
+                    Date(riwayat.tanggal_status).toLocaleDateString('id-ID') %>
+                    <%= new
+                    Date(riwayat.tanggal_status).toLocaleTimeString('id-ID') %>
+                  </small>
+                </div>
+                <% if(riwayat.keterangan) { %>
+                <p class="text-muted small mb-0"><%= riwayat.keterangan %></p>
+                <% } %>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% } else { %>
+          <p class="text-muted mb-0">Belum ada riwayat status</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Ringkasan Biaya -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Ringkasan Biaya</h5>
+
+          <!-- Subtotal -->
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <span>
+              Rp <%= orderDetails.subtotal.toLocaleString('id-ID') %>
+            </span>
+          </div>
+
+          <!-- Ongkir -->
+          <% if(pesanan.Pengiriman?.biaya_pengiriman > 0) { %>
+          <div class="d-flex justify-content-between mb-2">
+            <span>Biaya Pengiriman</span>
+            <span>
+              Rp <%= pesanan.Pengiriman.biaya_pengiriman.toLocaleString('id-ID')
+              %>
+            </span>
+          </div>
+          <% } %>
+
+          <hr />
+
+          <!-- Total -->
+          <div class="d-flex justify-content-between">
+            <strong>Total</strong>
+            <strong class="text-success">
+              Rp <%= pesanan.jumlah_total.toLocaleString('id-ID') %>
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informasi Pengiriman -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Informasi Pengiriman</h5>
+
+          <% if(pesanan.Pengiriman) { %>
+          <!-- Alamat Pengiriman -->
+          <% if(pesanan.Pengiriman.Alamat) { %>
+          <div class="mb-3">
+            <h6 class="text-muted mb-2">Alamat Pengiriman:</h6>
+            <p class="mb-1"><%= pesanan.Pengiriman.Alamat.alamat_jalan %></p>
+            <p class="mb-1">
+              <%= pesanan.Pengiriman.Alamat.kecamatan %>, <%=
+              pesanan.Pengiriman.Alamat.provinsi %>
+            </p>
+            <p class="mb-0">
+              Kode Pos: <%= pesanan.Pengiriman.Alamat.kode_pos %>
+            </p>
+          </div>
+          <% } %>
+
+          <!-- Metode Pengiriman -->
+          <div class="mb-3">
+            <h6 class="text-muted mb-2">Metode Pengiriman:</h6>
+            <p class="mb-0">
+              <%= pesanan.Pengiriman.metode_pengiriman === 'self_pickup' ?
+              'Ambil Sendiri di Toko' : 'Pengiriman ke Alamat' %>
+            </p>
+          </div>
+
+          <!-- Estimasi -->
+          <% if(pesanan.estimasi_selesai) { %>
+          <div class="mb-3">
+            <h6 class="text-muted mb-2">Estimasi Selesai:</h6>
+            <p class="mb-0">
+              <%= new Date(pesanan.estimasi_selesai).toLocaleDateString('id-ID',
+              { day: 'numeric', month: 'long', year: 'numeric' }) %>
+            </p>
+          </div>
+          <% } %> <% } else { %>
+          <p class="text-muted mb-0">Informasi pengiriman belum tersedia</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Status Pembayaran -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Status Pembayaran</h5>
+
+          <% if(pesanan.Pembayaran && pesanan.Pembayaran.status_pembayaran ===
+          'pending') { %>
+          <div class="alert alert-warning">
+            <strong>Batas Waktu Pembayaran:</strong>
+            <%= new
+            Date(pesanan.Pembayaran.batas_waktu_pembayaran).toLocaleString('id-ID')
+            %>
+          </div>
+          <% } %>
+
+          <!--pemisah-->
+
+          <% if(pesanan.Pembayaran) { %>
+          <div class="mb-3 p-3 bg-light rounded">
+            <div class="mb-2">
+              <strong>Status:</strong>
+              <span class="ms-2">
+                <%= formatStatus(pesanan.Pembayaran.status_pembayaran) %>
+              </span>
+            </div>
+            <div>
+              <strong>Metode:</strong>
+              <span class="ms-2"
+                ><%= pesanan.Pembayaran.metode_pembayaran %></span
+              >
+            </div>
+
+            <% if(pesanan.Pembayaran.catatan_pembayaran) { %>
+            <div class="mt-2">
+              <strong>Catatan:</strong>
+              <p class="mb-0 ms-2 text-muted">
+                <%= pesanan.Pembayaran.catatan_pembayaran %>
+              </p>
+            </div>
+            <% } %>
+          </div>
+
+          <% if(pesanan.Pembayaran.bukti_pembayaran) { %>
+          <div class="mt-3">
+            <h6 class="text-muted mb-2">Bukti Pembayaran:</h6>
+            <img
+              src="/uploads/pelanggan/pembayaran/<%= pesanan.Pembayaran.bukti_pembayaran %>"
+              class="img-fluid rounded"
+              alt="Bukti Pembayaran"
+            />
+          </div>
+          <% } %> <% } else { %>
+          <div class="p-3 bg-light rounded">
+            <p class="mb-3">
+              Total yang harus dibayar:
+              <strong class="d-block mt-1">
+                Rp <%= pesanan.jumlah_total.toLocaleString('id-ID') %>
+              </strong>
+            </p>
+
+            <div class="mb-3">
+              <p class="mb-2"><strong>Transfer ke:</strong></p>
+              <p class="mb-1">Bank BCA</p>
+              <p class="mb-1">1234567890</p>
+              <p class="mb-0">a.n. Ahmad Tailor</p>
+            </div>
+
+            <a
+              href="/orders/<%= pesanan.id_pesanan %>/upload-payment"
+              class="btn btn-success w-100"
+            >
+              <i class="fas fa-upload me-2"></i>Upload Bukti Pembayaran
+            </a>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+  }
+
+  .badge {
+    padding: 0.5em 1em;
+    font-weight: 500;
+  }
+
+  .alert-info {
+    background-color: #e8f4f8;
+    border-left: 4px solid #0dcaf0;
+  }
+
+  .alert-light {
+    background-color: #f8f9fa;
+    border-left: 4px solid #6c757d;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 1rem;
+  }
+  /* Lanjutan style sebelumnya */
+
+  .timeline-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    position: relative;
+  }
+
+  .timeline-marker::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: calc(100% + 1rem);
+    background-color: #dee2e6;
+  }
+
+  .timeline-item:last-child .timeline-marker::after {
+    display: none;
+  }
+
+  .text-success {
+    color: #198754 !important;
+  }
+
+  .bg-light {
+    background-color: #f8f9fa !important;
+  }
+
+  .btn-success {
+    background-color: #198754;
+    border-color: #198754;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background-color: #157347;
+    border-color: #146c43;
+  }
+
+  .img-fluid {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .rounded {
+    border-radius: 0.375rem !important;
+  }
+
+  .text-muted {
+    color: #6c757d !important;
+  }
+
+  .mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+
+  .mt-3 {
+    margin-top: 1rem !important;
+  }
+
+  .py-5 {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+
+  .alert {
+    position: relative;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+  }
+
+  .d-flex {
+    display: flex !important;
+  }
+
+  .justify-content-between {
+    justify-content: space-between !important;
+  }
+
+  .align-items-center {
+    align-items: center !important;
+  }
+
+  .flex-grow-1 {
+    flex-grow: 1 !important;
+  }
+
+  .w-100 {
+    width: 100% !important;
+  }
+
+  .border-top {
+    border-top: 1px solid #dee2e6 !important;
+  }
+
+  .pt-4 {
+    padding-top: 1.5rem !important;
+  }
+
+  hr {
+    margin: 1rem 0;
+    color: inherit;
+    border: 0;
+    border-top: 1px solid;
+    opacity: 0.25;
+  }
+
+  /* Responsive styles */
+  @media (max-width: 992px) {
+    .col-lg-8,
+    .col-lg-4 {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .card-body {
+      padding: 1rem;
+    }
+
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .timeline {
+      padding-left: 0.5rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    h4 {
+      font-size: 1.25rem;
+    }
+
+    .badge {
+      padding: 0.4em 0.8em;
+    }
+  }
+
+  /* Timeline styling */
+  .timeline {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: -1.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+  }
+
+  .timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: -1rem;
+    border-left: 2px solid #dee2e6;
+    height: 100%;
+    top: 0.5rem;
+  }
+
+  .timeline-content {
+    padding: 0.5rem 0;
+  }
+</style>

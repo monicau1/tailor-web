@@ -1,0 +1,96 @@
+<!-- /views/customer/partials/header.ejs -->
+
+<!-- Header -->
+<nav class="navbar navbar-expand-lg navbar-light shadow">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand text-success logo h1 align-self-center" href="/">
+      Ahmad Tailor
+    </a>
+
+    <button
+      class="navbar-toggler border-0"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#templatemo_main_nav"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div
+      class="align-self-center collapse navbar-collapse flex-fill d-lg-flex justify-content-lg-between"
+      id="templatemo_main_nav"
+    >
+      <div class="flex-fill">
+        <ul class="nav navbar-nav d-flex justify-content-between mx-lg-auto">
+          <li class="nav-item">
+            <a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">
+              Home
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/permak' ? 'active' : '' %>"
+              href="/permak"
+            >
+              Permak
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/pakaian' ? 'active' : '' %>"
+              href="/pakaian"
+            >
+              Pakaian
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link <%= path === '/contact' ? 'active' : '' %>"
+              href="/contact"
+            >
+              Contact
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="navbar align-self-center d-flex">
+        <% if (isAuthenticated) { %>
+        <!-- User Menu -->
+        <div class="d-flex align-items-center me-3">
+          <span class="nav-link">Hello, <%= user.name %></span>
+          <a class="nav-link" href="/auth/logout">Logout</a>
+        </div>
+
+        <!-- Cart Icon - Only show when logged in -->
+        <a
+          class="nav-icon position-relative text-decoration-none me-3"
+          href="/cart"
+        >
+          <i class="fa fa-fw fa-cart-arrow-down text-dark"></i>
+          <span
+            class="position-absolute top-0 left-100 translate-middle badge rounded-pill bg-light text-dark"
+          >
+            <%= locals.cartItemCount || 0 %>
+          </span>
+        </a>
+
+        <!-- Account Icon -->
+        <a
+          class="nav-icon position-relative text-decoration-none"
+          href="/profile"
+        >
+          <i class="fa fa-fw fa-user text-dark"></i>
+        </a>
+        <% } else { %>
+        <!-- Login Link -->
+        <a class="nav-link" href="/auth/login">Login</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- Close Header -->

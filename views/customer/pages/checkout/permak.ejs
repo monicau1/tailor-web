@@ -1,0 +1,634 @@
+<!-- views/customer/pages/checkout/permak.ejs -->
+<style>
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1060;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: 0;
+  }
+
+  .modal-dialog {
+    position: relative;
+    max-width: 500px;
+    margin: 1.75rem auto;
+    pointer-events: auto;
+    z-index: 1065;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  /* Card & Layout Styles */
+  .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-weight: 600;
+  }
+
+  /* Pastikan sticky content memiliki z-index yang lebih rendah */
+  .sticky-top {
+    z-index: 1020 !important;
+  }
+
+  /* Accordion Styles */
+  .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    color: #198754;
+  }
+
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+
+  /* Form Styles */
+  .form-check-label {
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+  }
+
+  /* Button Styles */
+  .btn-success {
+    padding: 1rem 2rem;
+    font-weight: 500;
+  }
+
+  .btn-success:disabled {
+    opacity: 0.65;
+  }
+
+  /* Badge Styles */
+  .badge {
+    padding: 0.5em 1em;
+    font-weight: normal;
+  }
+
+  /* Sticky Navigation */
+  .sticky-top {
+    z-index: 1020;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .sticky-top {
+      position: relative;
+      top: 0 !important;
+    }
+  }
+</style>
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Form Checkout -->
+    <div class="col-md-8">
+      <form action="/checkout/permak" method="POST" id="checkoutForm">
+        <!-- Alamat Pengambilan -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Alamat Pengambilan</h5>
+            <p class="text-muted small">
+              Pilih alamat untuk kurir menjemput pakaian yang akan dipermak
+            </p>
+
+            <% if(alamatPelanggan && alamatPelanggan.length > 0) { %> <%
+            alamatPelanggan.forEach(alamat => { %>
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="id_alamat_pickup"
+                    value="<%= alamat.id_alamat_pelanggan %>"
+                    data-area="<%= alamat.area_code %>"
+                    required
+                    id="alamat_pickup_<%= alamat.id_alamat_pelanggan %>"
+                  />
+                  <label
+                    class="form-check-label"
+                    for="alamat_pickup_<%= alamat.id_alamat_pelanggan %>"
+                  >
+                    <div class="ms-2">
+                      <strong class="d-block mb-1"
+                        ><%= alamat.alamat_jalan %></strong
+                      >
+                      <span class="d-block text-muted"
+                        ><%= alamat.kecamatan %>, <%= alamat.provinsi %></span
+                      >
+                      <span class="d-block text-muted"
+                        >Kode Pos: <%= alamat.kode_pos %></span
+                      >
+                      <span class="badge bg-success mt-2"
+                        >GRATIS Pengambilan</span
+                      >
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <% }) %> <% } else { %>
+            <div class="alert alert-warning">
+              <p class="mb-2">Anda belum memiliki alamat tersimpan.</p>
+              <a
+                href="/profile/alamat/tambah?redirect=checkout"
+                class="btn btn-warning btn-sm"
+              >
+                <i class="fas fa-plus me-1"></i>Tambah Alamat
+              </a>
+            </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Alamat Pengantaran -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Alamat Pengantaran</h5>
+            <p class="text-muted small">
+              Pilih alamat untuk kurir mengantar pakaian yang sudah selesai
+              dipermak
+            </p>
+
+            <% if(alamatPelanggan && alamatPelanggan.length > 0) { %> <%
+            alamatPelanggan.forEach(alamat => { %>
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="id_alamat_return"
+                    value="<%= alamat.id_alamat_pelanggan %>"
+                    data-area="<%= alamat.area_code %>"
+                    data-cost="<%= shippingAreas[alamat.area_code]?.cost || 0 %>"
+                    required
+                    id="alamat_return_<%= alamat.id_alamat_pelanggan %>"
+                  />
+                  <label
+                    class="form-check-label"
+                    for="alamat_return_<%= alamat.id_alamat_pelanggan %>"
+                  >
+                    <div class="ms-2">
+                      <strong class="d-block mb-1"
+                        ><%= alamat.alamat_jalan %></strong
+                      >
+                      <span class="d-block text-muted"
+                        ><%= alamat.kecamatan %>, <%= alamat.provinsi %></span
+                      >
+                      <span class="d-block text-muted"
+                        >Kode Pos: <%= alamat.kode_pos %></span
+                      >
+                      <% if(shippingAreas[alamat.area_code]) { %>
+                      <span class="badge bg-info mt-2">
+                        Area: <%= shippingAreas[alamat.area_code].name %> - Rp
+                        <%=
+                        shippingAreas[alamat.area_code].cost.toLocaleString('id-ID')
+                        %>
+                      </span>
+                      <% } %>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <% }) %> <% } %>
+
+            <div class="mt-3">
+              <a
+                href="/profile/alamat/tambah?redirect=checkout"
+                class="btn btn-outline-success"
+              >
+                <i class="fas fa-plus me-2"></i>Tambah Alamat Baru
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metode Pengambilan -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Metode Pengambilan</h5>
+
+            <div class="form-check mb-3">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="delivery_method"
+                id="selfDropoff"
+                value="self_dropoff"
+                required
+              />
+              <label class="form-check-label" for="selfDropoff">
+                <strong>Antar Sendiri ke Toko</strong>
+                <div class="text-muted small">
+                  Anda dapat mengantarkan pakaian langsung ke toko
+                </div>
+              </label>
+            </div>
+
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="delivery_method"
+                id="courierPickup"
+                value="courier"
+                required
+              />
+              <label class="form-check-label" for="courierPickup">
+                <strong>Dijemput oleh Kurir</strong>
+                <div class="text-muted small">
+                  Kurir kami akan menjemput pakaian ke alamat Anda (GRATIS)
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metode Pengantaran -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Metode Pengantaran</h5>
+
+            <div class="form-check mb-3">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="return_method"
+                id="selfPickup"
+                value="self_pickup"
+                required
+              />
+              <label class="form-check-label" for="selfPickup">
+                <strong>Ambil Sendiri di Toko</strong>
+                <div class="text-muted small">
+                  Anda dapat mengambil pakaian di toko setelah selesai
+                </div>
+              </label>
+            </div>
+
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="return_method"
+                id="courierReturn"
+                value="courier"
+                required
+              />
+              <label class="form-check-label" for="courierReturn">
+                <strong>Diantar oleh Kurir</strong>
+                <div class="text-muted small">
+                  Kurir akan mengantar ke alamat yang dipilih
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metode Pembayaran -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Metode Pembayaran</h5>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="metode_pembayaran"
+                value="transfer"
+                id="transferBank"
+                required
+              />
+              <label class="form-check-label" for="transferBank">
+                <strong>Transfer Bank</strong>
+                <div class="text-muted small">
+                  Transfer manual ke rekening BCA
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid">
+          <button
+            type="submit"
+            class="btn btn-success btn-lg"
+            id="btnSubmit"
+            disabled
+          >
+            Buat Pesanan
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Ringkasan Pesanan -->
+    <div class="col-md-4">
+      <div class="card sticky-top" style="top: 2rem">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Ringkasan Pesanan</h5>
+
+          <!-- Daftar Item Permak -->
+          <% keranjang.ItemKeranjang.forEach(item => { %>
+          <div class="border rounded p-3 mb-4">
+            <!-- Header Item -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-tshirt me-2 text-success"></i>
+                  <h6 class="d-inline mb-0"><%= item.deskripsi_pakaian %></h6>
+                </div>
+
+                <!-- Tombol lihat gambar jika ada -->
+                <% if(item.gambar_permak) { %>
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#modalGambar<%= item.id_keranjang_permak %>"
+                >
+                  <i class="fas fa-image"></i> Lihat Foto
+                </button>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- Modal untuk gambar -->
+            <% if(item.gambar_permak) { %>
+            <div
+              class="modal"
+              id="modalGambar<%= item.id_keranjang_permak %>"
+              tabindex="-1"
+              data-bs-backdrop="false"
+            >
+              <div
+                class="modal-dialog modal-dialog-centered"
+                style="max-width: 90%; margin: 1.75rem auto"
+              >
+                <div class="modal-content shadow">
+                  <div class="modal-header border-bottom">
+                    <h5 class="modal-title">Foto Pakaian</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                    ></button>
+                  </div>
+                  <div class="modal-body text-center p-0">
+                    <img
+                      src="/uploads/pelanggan/pesanan/permak/<%= item.gambar_permak %>"
+                      class="img-fluid"
+                      alt="Foto Pakaian"
+                      style="max-height: 80vh"
+                      onerror="this.onerror=null; this.src='/images/default.jpg';"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <% } %>
+
+            <!-- Detail Permak -->
+            <% item.DetailPermak.forEach((detail, index) => { %>
+            <div class="<%= index > 0 ? 'border-top pt-3 mt-3' : '' %>">
+              <!-- Nama dan Harga -->
+              <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-2"><%= detail.JenisPermak.nama_permak %></h6>
+                <span class="text-success"
+                  >Rp <%= detail.harga_per_item.toLocaleString('id-ID') %></span
+                >
+              </div>
+
+              <!-- Instruksi Khusus -->
+              <div class="bg-light rounded p-3 mt-2">
+                <% if(detail.JenisPermak.tipe_permak === 'alterasi') { %>
+                <p class="small mb-2">
+                  <strong>Catatan Perubahan:</strong><br />
+                  <%= detail.InstruksiPermak.catatan_perubahan %>
+                </p>
+                <% } else { %>
+                <p class="small mb-2">
+                  <strong>Lokasi Perbaikan:</strong><br />
+                  <%= detail.InstruksiPermak.lokasi_perbaikan %>
+                </p>
+                <p class="small mb-2">
+                  <strong>Deskripsi Perbaikan:</strong><br />
+                  <%= detail.InstruksiPermak.deskripsi_perbaikan %>
+                </p>
+                <% } %> <% if(detail.InstruksiPermak.catatan_tambahan) { %>
+                <p class="small mb-0">
+                  <strong>Catatan Tambahan:</strong><br />
+                  <%= detail.InstruksiPermak.catatan_tambahan %>
+                </p>
+                <% } %>
+              </div>
+            </div>
+            <% }) %>
+          </div>
+          <% }) %>
+
+          <!-- Ringkasan Biaya -->
+          <div class="border-top pt-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal</span>
+              <span id="subtotal" data-value="<%= total %>"
+                >Rp <%= total.toLocaleString('id-ID') %></span
+              >
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span>Biaya Pengambilan</span>
+              <span id="pickupCost">Gratis</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+              <span>Biaya Pengantaran</span>
+              <span id="returnCost">Rp 0</span>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+              <strong>Total</strong>
+              <strong id="grandTotal"
+                >Rp <%= total.toLocaleString('id-ID') %></strong
+              >
+            </div>
+          </div>
+
+          <!-- Info Pembayaran -->
+          <div class="alert alert-info mt-3 mb-0">
+            <h6 class="mb-2">Informasi:</h6>
+            <p class="small mb-0">
+              Setelah membuat pesanan, Anda akan diarahkan ke halaman pembayaran
+              untuk mengunggah bukti transfer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("checkoutForm");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const deliveryMethodInputs = document.querySelectorAll(
+      'input[name="delivery_method"]'
+    );
+    const returnMethodInputs = document.querySelectorAll(
+      'input[name="return_method"]'
+    );
+    const returnCostDisplay = document.getElementById("returnCost");
+    const grandTotalDisplay = document.getElementById("grandTotal");
+    const subtotal = parseInt(
+      document.getElementById("subtotal").dataset.value || 0
+    );
+
+    function validateForm() {
+      const deliveryMethod = document.querySelector(
+        'input[name="delivery_method"]:checked'
+      )?.value;
+      const returnMethod = document.querySelector(
+        'input[name="return_method"]:checked'
+      )?.value;
+      const paymentMethod = document.querySelector(
+        'input[name="metode_pembayaran"]:checked'
+      );
+
+      // Validasi dasar
+      if (!deliveryMethod || !returnMethod || !paymentMethod) return false;
+
+      // Validasi alamat berdasarkan metode pengiriman
+      if (deliveryMethod === "courier") {
+        const pickupAddress = document.querySelector(
+          'input[name="id_alamat_pickup"]:checked'
+        );
+        if (!pickupAddress) return false;
+      }
+
+      if (returnMethod === "courier") {
+        const returnAddress = document.querySelector(
+          'input[name="id_alamat_return"]:checked'
+        );
+        if (!returnAddress) return false;
+      }
+
+      return true;
+    }
+
+    function updateTotal() {
+      const returnMethod = document.querySelector(
+        'input[name="return_method"]:checked'
+      )?.value;
+      const selectedAddress = document.querySelector(
+        'input[name="id_alamat_return"]:checked'
+      );
+      let returnCost = 0;
+
+      if (returnMethod === "courier" && selectedAddress) {
+        returnCost = parseInt(selectedAddress.dataset.cost || 0);
+      }
+
+      returnCostDisplay.textContent =
+        returnCost > 0 ? `Rp ${returnCost.toLocaleString("id-ID")}` : "Rp 0";
+
+      const grandTotal = subtotal + returnCost;
+      grandTotalDisplay.textContent = `Rp ${grandTotal.toLocaleString(
+        "id-ID"
+      )}`;
+    }
+
+    // Event listeners untuk radio buttons
+    deliveryMethodInputs.forEach((input) => {
+      input.addEventListener("change", function () {
+        const pickupAddressInputs = document.querySelectorAll(
+          'input[name="id_alamat_pickup"]'
+        );
+        pickupAddressInputs.forEach((addr) => {
+          addr.disabled = this.value !== "courier";
+          addr.required = this.value === "courier";
+        });
+        btnSubmit.disabled = !validateForm();
+      });
+    });
+
+    returnMethodInputs.forEach((input) => {
+      input.addEventListener("change", function () {
+        const returnAddressInputs = document.querySelectorAll(
+          'input[name="id_alamat_return"]'
+        );
+        returnAddressInputs.forEach((addr) => {
+          addr.disabled = this.value !== "courier";
+          addr.required = this.value === "courier";
+        });
+        updateTotal();
+        btnSubmit.disabled = !validateForm();
+      });
+    });
+
+    // Monitor semua perubahan form
+    form.addEventListener("change", function () {
+      btnSubmit.disabled = !validateForm();
+    });
+
+    // Handle form submission
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (!validateForm()) {
+        alert("Mohon lengkapi semua informasi yang diperlukan");
+        return;
+      }
+
+      try {
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
+
+        // Submit form
+        this.submit();
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        alert("Terjadi kesalahan. Silakan coba lagi.");
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = "Buat Pesanan";
+      }
+    });
+  });
+
+  // Modal handler (dipisahkan)
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".modal").forEach((modal) => {
+      modal.addEventListener("click", function (e) {
+        if (e.target === this) {
+          const modalInstance = bootstrap.Modal.getInstance(this);
+          if (modalInstance) {
+            modalInstance.hide();
+          }
+        }
+      });
+    });
+  });
+</script>

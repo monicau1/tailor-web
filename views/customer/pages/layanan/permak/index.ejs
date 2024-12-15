@@ -1,0 +1,193 @@
+<!-- views/customer/pages/layanan/permak/index.ejs -->
+<div class="container py-5">
+  <div class="row">
+    <!-- Header -->
+    <div class="col-12 mb-4">
+      <h1 class="text-center">Layanan Permak</h1>
+      <p class="text-center text-muted">
+        Pilih kategori layanan permak yang Anda butuhkan
+      </p>
+    </div>
+
+    <!-- Kategori Grid -->
+    <div class="col-12">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <% if(kategoriPermak && kategoriPermak.length > 0) { %> <%
+        kategoriPermak.forEach(kategori => { %>
+        <div class="col">
+          <div class="card h-100 category-card">
+            <!-- Gambar Kategori -->
+            <div class="category-img-wrapper">
+              <% if(kategori.nama_file_gambar) { %>
+              <img
+                class="category-img"
+                src="/uploads/admin/kategori-permak/<%= kategori.nama_file_gambar %>"
+                alt="<%= kategori.nama_kategori_permak %>"
+              />
+              <% } else { %>
+              <img
+                class="category-img"
+                src="https://placehold.co/400x320?text="
+                alt="Permak Image Placeholder"
+              />
+              <% } %>
+            </div>
+
+            <!-- Konten Kartu -->
+            <div class="card-body d-flex flex-column">
+              <h5 class="category-title mb-2">
+                <%= kategori.nama_kategori_permak %>
+              </h5>
+
+              <span class="badge bg-success mb-2">
+                <%= kategori.JenisPermak.length %> Jenis Layanan
+              </span>
+
+              <% if(kategori.deskripsi) { %>
+              <p class="category-description">
+                <%= kategori.deskripsi.length > 100 ?
+                kategori.deskripsi.substring(0, 100) + '...' :
+                kategori.deskripsi %>
+              </p>
+              <% } %>
+
+              <div class="mt-auto">
+                <a
+                  href="/permak/kategori/<%= kategori.id_kategori_permak %>"
+                  class="btn btn-outline-success w-100"
+                >
+                  Lihat Detail
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }) %> <% } else { %>
+        <div class="col-12">
+          <div class="alert alert-info text-center">
+            Belum ada kategori permak yang tersedia.
+          </div>
+        </div>
+        <% } %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+      <div class="row mt-4">
+        <div class="col-12">
+          <nav>
+            <ul class="pagination justify-content-center">
+              <% for(let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                <a class="page-link" href="/permak?page=<%= i %>"><%= i %></a>
+              </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Card styling */
+  .category-card {
+    border: none;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+  }
+
+  .category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Image container and image styling */
+  .category-img-wrapper {
+    position: relative;
+    width: 100%;
+    height: 180px; /* Fixed height for consistent look */
+    overflow: hidden;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .category-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .category-card:hover .category-img {
+    transform: scale(1.05);
+  }
+
+  /* Title styling */
+  .category-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  /* Description styling */
+  .category-description {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+
+  /* Badge styling */
+  .badge {
+    align-self: center;
+    padding: 0.5em 1em;
+    font-weight: 500;
+    font-size: 0.8rem;
+  }
+
+  /* Button styling */
+  .btn-outline-success {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .btn-outline-success:hover {
+    background-color: #198754;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* Pagination styling */
+  .pagination {
+    margin-top: 2rem;
+  }
+
+  .page-link {
+    color: #198754;
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    border-radius: 4px;
+  }
+
+  .page-item.active .page-link {
+    background-color: #198754;
+    border-color: #198754;
+  }
+
+  .page-link:hover {
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
+  }
+</style>

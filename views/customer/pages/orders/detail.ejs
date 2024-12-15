@@ -1,0 +1,428 @@
+<!-- views/customer/pages/orders/detail.ejs -->
+<div class="container py-5">
+  <!-- Header Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h4 class="mb-1">Pesanan #<%= pesanan.id_pesanan %></h4>
+          <p class="text-muted mb-0">
+            <%= new Date(pesanan.tanggal_pesanan).toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'long', year: 'numeric' }) %>
+          </p>
+        </div>
+        <span class="badge bg-secondary">
+          <%= pesanan.StatusPesanan.nama_status %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Items Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Detail Pesanan</h5>
+
+          <% const isPermak = pesanan.ItemPesanan && pesanan.ItemPesanan[0] &&
+          pesanan.ItemPesanan[0].JenisPermak; const firstPermakItem =
+          pesanan.ItemPesanan && pesanan.ItemPesanan.find(item =>
+          item.JenisPermak); %>
+
+          <!-- Deskripsi Pakaian untuk Permak -->
+          <% if (isPermak && firstPermakItem && firstPermakItem.InstruksiKhusus
+          && firstPermakItem.InstruksiKhusus.deskripsi_item) { %>
+          <div class="alert alert-light mb-4">
+            <p class="mb-0">
+              <%= firstPermakItem.InstruksiKhusus.deskripsi_item %>
+            </p>
+          </div>
+          <% } %>
+
+          <!-- Item List -->
+          <% pesanan.ItemPesanan.forEach((item, index) => { %>
+          <div class="<%= index > 0 ? 'border-top pt-4 mt-4' : '' %>">
+            <div class="row">
+              <!-- Item Image -->
+              <div class="col-md-3 mb-3 mb-md-0">
+                <% if (item.VarianPakaian && item.VarianPakaian.Pakaian &&
+                item.VarianPakaian.Pakaian.GambarPakaian &&
+                item.VarianPakaian.Pakaian.GambarPakaian[0]) { %>
+                <img
+                  src="/uploads/admin/produk-pakaian/<%= item.VarianPakaian.Pakaian.GambarPakaian[0].nama_file %>"
+                  class="img-fluid rounded"
+                  alt="Produk"
+                />
+                <% } else if (item.gambar_permak) { %>
+                <img
+                  src="/uploads/pelanggan/pesanan/permak/<%= item.gambar_permak %>"
+                  class="img-fluid rounded"
+                  alt="Permak"
+                />
+                <% } %>
+              </div>
+
+              <!-- Item Details -->
+              <div class="col-md-9">
+                <div class="mb-3">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-2"
+                  >
+                    <h6 class="mb-0">
+                      <% if (item.VarianPakaian && item.VarianPakaian.Pakaian) {
+                      %> <%= item.VarianPakaian.Pakaian.nama_pakaian %> <% }
+                      else if (item.JenisPermak) { %> <%=
+                      item.JenisPermak.nama_permak %> <% } %>
+                    </h6>
+                    <small class="text-muted">
+                      <%= item.VarianPakaian ? 'Jahit' : 'Permak' %>
+                    </small>
+                  </div>
+
+                  <!-- Custom Size Details -->
+                  <% if (item.UkuranKhusus) { %>
+                  <div class="bg-light p-3 rounded mb-3">
+                    <div class="row">
+                      <% if (item.UkuranKhusus.ukuran_dada) { %>
+                      <div class="col-6 mb-2">
+                        <small class="text-muted">Dada:</small>
+                        <div><%= item.UkuranKhusus.ukuran_dada %> cm</div>
+                      </div>
+                      <% } %> <% if (item.UkuranKhusus.ukuran_pinggang) { %>
+                      <div class="col-6 mb-2">
+                        <small class="text-muted">Pinggang:</small>
+                        <div><%= item.UkuranKhusus.ukuran_pinggang %> cm</div>
+                      </div>
+                      <% } %> <% if (item.UkuranKhusus.panjang_tubuh) { %>
+                      <div class="col-6">
+                        <small class="text-muted">Panjang:</small>
+                        <div><%= item.UkuranKhusus.panjang_tubuh %> cm</div>
+                      </div>
+                      <% } %>
+                    </div>
+                  </div>
+                  <% } else if (item.VarianPakaian) { %>
+                  <p class="mb-2">
+                    Ukuran: <%= item.VarianPakaian.ukuran %> | Warna: <%=
+                    item.VarianPakaian.warna %>
+                  </p>
+                  <% } %>
+
+                  <!-- Permak Instructions -->
+                  <% if (item.JenisPermak && item.InstruksiKhusus) { %>
+                  <div class="bg-light p-3 rounded">
+                    <% if (item.InstruksiKhusus.lokasi_perbaikan) { %>
+                    <div class="mb-2">
+                      <small class="text-muted d-block"
+                        >Lokasi Perbaikan:</small
+                      >
+                      <%= item.InstruksiKhusus.lokasi_perbaikan %>
+                    </div>
+                    <% } %> <% if (item.InstruksiKhusus.deskripsi_perbaikan) {
+                    %>
+                    <div>
+                      <small class="text-muted d-block"
+                        >Detail Perbaikan:</small
+                      >
+                      <%= item.InstruksiKhusus.deskripsi_perbaikan %>
+                    </div>
+                    <% } %>
+                  </div>
+                  <% } %>
+
+                  <!-- Price & Quantity -->
+                  <div
+                    class="d-flex justify-content-between align-items-center mt-3"
+                  >
+                    <small class="text-muted"
+                      >Jumlah: <%= item.kuantitas %></small
+                    >
+                    <div>
+                      Rp <%= (item.harga_per_item *
+                      item.kuantitas).toLocaleString('id-ID') %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Order Status Timeline -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Status Pesanan</h5>
+
+          <% if (pesanan.RiwayatStatusPesanan &&
+          pesanan.RiwayatStatusPesanan.length > 0) { %>
+          <div class="timeline">
+            <% pesanan.RiwayatStatusPesanan.forEach(riwayat => { %>
+            <div class="mb-3 ps-3 border-start">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <div><%= riwayat.StatusRiwayat.nama_status %></div>
+                <small class="text-muted">
+                  <%= new
+                  Date(riwayat.tanggal_status).toLocaleDateString('id-ID') %>
+                </small>
+              </div>
+              <% if (riwayat.keterangan) { %>
+              <small class="text-muted"><%= riwayat.keterangan %></small>
+              <% } %>
+            </div>
+            <% }); %>
+          </div>
+          <% } else { %>
+          <p class="text-muted mb-0">Belum ada riwayat status</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Price Summary -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Ringkasan Biaya</h5>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal</span>
+              <span>
+                Rp <%= (pesanan.jumlah_total - (pesanan.Pengiriman &&
+                pesanan.Pengiriman.biaya_pengiriman || 0))
+                .toLocaleString('id-ID') %>
+              </span>
+            </div>
+
+            <% if (pesanan.Pengiriman && pesanan.Pengiriman.biaya_pengiriman) {
+            %>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Biaya Pengiriman</span>
+              <span>
+                Rp <%=
+                pesanan.Pengiriman.biaya_pengiriman.toLocaleString('id-ID') %>
+              </span>
+            </div>
+            <% } %>
+          </div>
+
+          <div class="d-flex justify-content-between border-top pt-3">
+            <strong>Total</strong>
+            <strong
+              >Rp <%= pesanan.jumlah_total.toLocaleString('id-ID') %></strong
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Info -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Informasi Pengiriman</h5>
+
+          <% if (pesanan.Pengiriman && pesanan.Pengiriman.AlamatPengiriman) { %>
+          <!-- Address -->
+          <div class="mb-4">
+            <h6 class="text-muted mb-2">Alamat Pengiriman</h6>
+            <p class="mb-1">
+              <%= pesanan.Pengiriman.AlamatPengiriman.alamat_jalan %>
+            </p>
+            <p class="mb-1">
+              <%= pesanan.Pengiriman.AlamatPengiriman.kecamatan %>, <%=
+              pesanan.Pengiriman.AlamatPengiriman.provinsi %>
+            </p>
+            <p class="mb-0">
+              Kode Pos: <%= pesanan.Pengiriman.AlamatPengiriman.kode_pos %>
+            </p>
+          </div>
+
+          <!-- Delivery Method -->
+          <div class="mb-3">
+            <h6 class="text-muted mb-2">Metode Pengiriman</h6>
+            <p class="mb-0">
+              <%= pesanan.Pengiriman.metode_pengiriman === 'self_dropoff' ?
+              'Antar Sendiri ke Toko' : 'Dijemput Kurir' %>
+            </p>
+          </div>
+
+          <!-- Return Method (for Permak) -->
+          <% if (isPermak) { %>
+          <div class="mb-3">
+            <h6 class="text-muted mb-2">Metode Pengembalian</h6>
+            <p class="mb-0">
+              <%= pesanan.Pengiriman.metode_pengembalian === 'self_pickup' ?
+              'Ambil Sendiri di Toko' : 'Diantar Kurir' %>
+            </p>
+          </div>
+          <% } %>
+
+          <!-- Tracking Number -->
+          <% if (pesanan.Pengiriman.nomor_resi) { %>
+          <div class="mb-3">
+            <h6 class="text-muted mb-2">Nomor Resi</h6>
+            <p class="mb-0"><%= pesanan.Pengiriman.nomor_resi %></p>
+          </div>
+          <% } %>
+
+          <!-- Estimated Completion -->
+          <% if (pesanan.estimasi_selesai) { %>
+          <div>
+            <h6 class="text-muted mb-2">Estimasi Selesai</h6>
+            <p class="mb-0">
+              <%= new Date(pesanan.estimasi_selesai).toLocaleDateString('id-ID',
+              { day: 'numeric', month: 'long', year: 'numeric' }) %>
+            </p>
+          </div>
+          <% } %> <% } else { %>
+          <p class="text-muted mb-0">Data pengiriman belum tersedia</p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Payment Status -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title mb-4">Status Pembayaran</h5>
+
+          <% if (pesanan.Pembayaran) { %>
+          <div class="mb-3 p-3 bg-light rounded">
+            <div class="mb-2">
+              <strong>Status:</strong>
+              <%= pesanan.Pembayaran.status_pembayaran %>
+            </div>
+            <div>
+              <strong>Metode:</strong>
+              <%= pesanan.Pembayaran.metode_pembayaran %>
+            </div>
+          </div>
+
+          <% if (pesanan.Pembayaran.bukti_pembayaran) { %>
+          <div>
+            <h6 class="text-muted mb-2">Bukti Pembayaran</h6>
+            <img
+              src="/uploads/pelanggan/pembayaran/<%= pesanan.Pembayaran.bukti_pembayaran %>"
+              class="img-fluid rounded"
+              alt="Bukti Pembayaran"
+            />
+          </div>
+          <% } %> <% } else { %>
+          <div class="p-3 bg-light rounded">
+            <p class="mb-3">
+              Total yang harus dibayar:
+              <strong
+                >Rp <%= pesanan.jumlah_total.toLocaleString('id-ID') %></strong
+              >
+            </p>
+
+            <div class="mb-3">
+              <p class="mb-2"><strong>Transfer ke:</strong></p>
+              <div class="mb-3">
+                <p class="mb-1">Bank BCA</p>
+                <p class="mb-1">1234567890</p>
+                <p>a.n. Ahmad Tailor</p>
+              </div>
+            </div>
+
+            <a
+              href="/orders/<%= pesanan.id_pesanan %>/upload-payment"
+              class="btn btn-secondary w-100"
+            >
+              Upload Bukti Pembayaran
+            </a>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-weight: 500;
+    font-size: 1.1rem;
+  }
+
+  .badge {
+    padding: 0.5em 1em;
+    font-weight: normal;
+  }
+
+  .img-fluid {
+    max-height: 200px;
+    object-fit: contain;
+  }
+
+  .text-muted {
+    color: #6c757d !important;
+  }
+
+  .bg-light {
+    background-color: #f8f9fa !important;
+  }
+
+  .border-start {
+    border-left: 2px solid #dee2e6 !important;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-weight: normal;
+  }
+
+  @media (max-width: 768px) {
+    .card-body {
+      padding: 1rem;
+    }
+  }
+
+  .timeline .border-start {
+    position: relative;
+  }
+
+  .timeline .border-start:before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dee2e6;
+  }
+
+  strong {
+    font-weight: 500;
+  }
+
+  p {
+    margin-bottom: 0.5rem;
+  }
+
+  .rounded {
+    border-radius: 0.5rem !important;
+  }
+
+  .alert-light {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
+
+  h6.text-muted {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+</style>

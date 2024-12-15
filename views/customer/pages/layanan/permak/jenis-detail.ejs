@@ -1,0 +1,248 @@
+<!-- views/customer/pages/layanan/permak/jenis-detail.ejs -->
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-6">
+      <h2><%= jenisPermak.nama_permak %></h2>
+      <p class="text-muted"><%= jenisPermak.deskripsi_jenis_permak %></p>
+      <h4 class="mt-4">Rp <%= jenisPermak.harga.toLocaleString('id-ID') %></h4>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title">Detail Permak</h3>
+
+          <% if (messages.error) { %>
+          <div class="alert alert-danger" role="alert">
+            <%= messages.error %>
+          </div>
+          <% } %>
+
+          <form
+            action="/permak/add-to-cart/<%= jenisPermak.id_jenis_permak %>"
+            method="POST"
+            enctype="multipart/form-data"
+            id="permakForm"
+          >
+            <!-- Single hidden field for from_cart -->
+            <input
+              type="hidden"
+              name="from_cart"
+              value="false"
+              id="fromCartInput"
+            />
+
+            <!-- Pilihan Pakaian yang akan Dipermak -->
+            <% if (existingItems && existingItems.length > 0) { %>
+            <div class="mb-4">
+              <label class="form-label">Pilih Pakaian yang akan Dipermak</label>
+
+              <div class="form-check mb-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="item_choice"
+                  value="new"
+                  id="newItem"
+                  checked
+                />
+                <label class="form-check-label" for="newItem">
+                  Tambahkan sebagai pakaian baru untuk dipermak
+                </label>
+              </div>
+
+              <div class="form-check mb-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="item_choice"
+                  value="existing"
+                  id="existingItem"
+                />
+                <label class="form-check-label" for="existingItem">
+                  Tambahkan ke pakaian yang sudah ada di keranjang
+                </label>
+              </div>
+
+              <select
+                name="id_keranjang_permak"
+                class="form-select mt-2"
+                id="existingItemSelect"
+                disabled
+              >
+                <option value="">Pilih pakaian...</option>
+                <% existingItems.forEach(item => { %>
+                <option value="<%= item.id_keranjang_permak %>">
+                  <%= item.deskripsi_pakaian %> (<%= item.DetailPermak.length %>
+                  jenis permak: <%= item.DetailPermak.map(d =>
+                  d.JenisPermak.nama_permak).join(", ") %>)
+                </option>
+                <% }) %>
+              </select>
+            </div>
+            <% } %>
+
+            <!-- Deskripsi Item dan Upload Gambar - hanya untuk pakaian baru -->
+            <!-- New item fields -->
+            <div id="deskripsiItemContainer">
+              <div class="mb-3">
+                <label for="deskripsi_pakaian" class="form-label">
+                  Deskripsi Pakaian <span class="text-danger">*</span>
+                </label>
+                <textarea
+                  class="form-control"
+                  id="deskripsi_pakaian"
+                  name="deskripsi_pakaian"
+                  rows="2"
+                  required="<%= !locals.id_keranjang_permak %>"
+                  placeholder="Contoh: Celana jeans biru tua, bahan denim tebal"
+                >
+<%= locals.formData?.deskripsi_pakaian || '' %></textarea
+                >
+              </div>
+
+              <div class="mb-3">
+                <label for="gambar_permak" class="form-label">
+                  Foto Pakaian <span class="text-danger">*</span>
+                  <small class="text-muted"
+                    >(Maks. 5MB, format: JPG, PNG)</small
+                  >
+                </label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="gambar_permak"
+                  name="gambar_permak"
+                  accept="image/*"
+                  required="<%= !locals.id_keranjang_permak %>"
+                />
+              </div>
+            </div>
+
+            <% if(jenisPermak.tipe_permak === 'alterasi') { %>
+            <!-- Form untuk Alterasi -->
+            <div class="mb-3">
+              <label for="catatan_perubahan" class="form-label"
+                >Catatan Perubahan <span class="text-danger">*</span></label
+              >
+              <textarea
+                class="form-control"
+                id="catatan_perubahan"
+                name="catatan_perubahan"
+                rows="3"
+                placeholder="Jelaskan perubahan yang diinginkan (ukuran, model, dll)"
+                required
+              >
+<%= locals.formData ? formData.catatan_perubahan : '' %></textarea
+              >
+            </div>
+            <% } else { %>
+            <!-- Form untuk Perbaikan -->
+            <div class="mb-3">
+              <label for="lokasi_perbaikan" class="form-label"
+                >Lokasi Perbaikan <span class="text-danger">*</span></label
+              >
+              <input
+                type="text"
+                class="form-control"
+                id="lokasi_perbaikan"
+                name="lokasi_perbaikan"
+                placeholder="Contoh: bagian bawah celana, saku kanan"
+                value="<%= locals.formData ? formData.lokasi_perbaikan : '' %>"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="deskripsi_perbaikan" class="form-label"
+                >Deskripsi Kerusakan</label
+              >
+              <textarea
+                class="form-control"
+                id="deskripsi_perbaikan"
+                name="deskripsi_perbaikan"
+                rows="3"
+                placeholder="Jelaskan detail kerusakan yang perlu diperbaiki"
+              >
+<%= locals.formData ? formData.deskripsi_perbaikan : '' %></textarea
+              >
+            </div>
+            <% } %>
+
+            <!-- Catatan Tambahan untuk keduanya -->
+            <div class="mb-3">
+              <label for="catatan_tambahan" class="form-label"
+                >Catatan untuk Penjahit</label
+              >
+              <textarea
+                class="form-control"
+                id="catatan_tambahan"
+                name="catatan_tambahan"
+                rows="2"
+                placeholder="Tambahan informasi untuk penjahit (opsional)"
+              >
+<%= locals.formData ? formData.catatan_tambahan : '' %></textarea
+              >
+            </div>
+
+            <button type="submit" class="btn btn-success w-100" id="submitBtn">
+              Tambah ke Keranjang
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Updated script
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("permakForm");
+    const itemChoices = document.getElementsByName("item_choice");
+    const existingSelect = document.getElementById("existingItemSelect");
+    const deskripsiContainer = document.getElementById(
+      "deskripsiItemContainer"
+    );
+    const gambarInput = document.getElementById("gambar_permak");
+    const deskripsiInput = document.getElementById("deskripsi_pakaian");
+
+    // Handle radio changes
+    itemChoices.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        const isExisting = this.value === "existing";
+
+        // Toggle fields
+        existingSelect.disabled = !isExisting;
+        existingSelect.required = isExisting;
+
+        // Toggle required and display
+        gambarInput.required = !isExisting;
+        deskripsiInput.required = !isExisting;
+        deskripsiContainer.style.display = isExisting ? "none" : "block";
+      });
+    });
+
+    // Handle submit
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const isExisting = document.getElementById("existingItem")?.checked;
+      if (isExisting) {
+        const id = existingSelect.value;
+        if (!id) {
+          alert("Silakan pilih pakaian");
+          return;
+        }
+        form.action += `?id_keranjang_permak=${id}`;
+      }
+
+      form.submit();
+    });
+  });
+</script>

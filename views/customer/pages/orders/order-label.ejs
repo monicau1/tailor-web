@@ -1,0 +1,147 @@
+<!-- views/customer/pages/orders/order-label.ejs -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Label Pesanan #<%= pesanan.id_pesanan %></title>
+    <style>
+      /* Style untuk tampilan umum */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        font-size: 12pt;
+      }
+      .label-page {
+        width: 380px;
+        border: 2px solid #000;
+        padding: 15px;
+        margin: 0 auto;
+        page-break-inside: avoid;
+      }
+      .store-info {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+      }
+      .store-name {
+        font-size: 16pt;
+        font-weight: bold;
+        margin: 0;
+      }
+      .store-address {
+        margin: 5px 0;
+        font-size: 10pt;
+      }
+      .order-info {
+        margin: 10px 0;
+        padding: 5px 0;
+      }
+      .customer-info {
+        margin: 10px 0;
+        padding: 5px 0;
+        border-top: 1px dashed #000;
+        border-bottom: 1px dashed #000;
+      }
+      .items-info {
+        margin: 10px 0;
+      }
+      .item-detail {
+        margin-left: 15px;
+        font-size: 10pt;
+      }
+
+      /* Style khusus untuk print */
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        .no-print {
+          display: none;
+        }
+        @page {
+          size: A6;
+          margin: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Tombol Print (hanya muncul di preview) -->
+    <div class="no-print" style="text-align: center; margin-bottom: 20px">
+      <button
+        onclick="window.print()"
+        style="padding: 10px 20px; font-size: 14px; cursor: pointer"
+      >
+        Print Label
+      </button>
+    </div>
+
+    <div class="label-page">
+      <!-- Info Toko -->
+      <div class="store-info">
+        <h1 class="store-name"><%= store.name %></h1>
+        <div class="store-address">
+          <%= store.address %><br />
+          Telp: <%= store.phone %>
+        </div>
+      </div>
+
+      <!-- Info Pesanan -->
+      <div class="order-info">
+        <strong>No. Pesanan: #<%= pesanan.id_pesanan %></strong><br />
+        Tanggal: <%= new
+        Date(pesanan.tanggal_pesanan).toLocaleDateString('id-ID', { day:
+        'numeric', month: 'long', year: 'numeric' }) %>
+      </div>
+
+      <!-- Info Pelanggan -->
+      <div class="customer-info">
+        <strong>Pelanggan:</strong><br />
+        <%= pesanan.PelangganPesanan.nama_pelanggan %><br />
+        <%= pesanan.PelangganPesanan.nomor_telepon %>
+      </div>
+
+      <!-- Info Item -->
+      <!-- Di order-label.ejs, ubah bagian Items Info -->
+      <div class="items-info">
+        <strong>Detail Permak:</strong><br />
+        <% pesanan.PesananPermak.forEach(permak => { %>
+        <div style="margin-top: 10px">
+          <!-- Kategori dan Deskripsi Pakaian -->
+          <div style="margin-bottom: 5px">
+            <strong><%= permak.KategoriPermak.nama_kategori_permak %></strong>
+            <div style="font-size: 10pt"><%= permak.deskripsi_pakaian %></div>
+          </div>
+
+          <!-- Detail Jenis Permak -->
+          <div class="item-detail">
+            <% permak.DetailPermak.forEach(detail => { %>
+            <div style="margin-bottom: 5px">
+              - <%= detail.JenisPermak.nama_permak %> (<%= detail.kuantitas %>
+              pcs) <% if(detail.InstruksiPermak) { %>
+              <div style="padding-left: 10px; font-size: 9pt">
+                <% if(detail.JenisPermak.tipe_permak === 'alterasi') { %>
+                Catatan: <%= detail.InstruksiPermak.catatan_perubahan %> <% }
+                else { %> Lokasi: <%= detail.InstruksiPermak.lokasi_perbaikan %>
+                <% if(detail.InstruksiPermak.deskripsi_perbaikan) { %>
+                <br />Deskripsi: <%= detail.InstruksiPermak.deskripsi_perbaikan
+                %> <% } %> <% } %>
+              </div>
+              <% } %>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Catatan -->
+      <div style="margin-top: 15px; font-size: 10pt; text-align: center">
+        Terima kasih telah memesan di toko kami ❤️
+      </div>
+    </div>
+  </body>
+</html>

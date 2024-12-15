@@ -1,0 +1,66 @@
+<div class="card login-card">
+  <div class="card-body p-4">
+    <h4 class="card-title text-center mb-4">Login Admin</h4>
+
+    <form action="/admin/login" method="POST" id="loginForm">
+      <div class="mb-3">
+        <label for="identifier" class="form-label">Email atau Username</label>
+        <input
+          type="text"
+          class="form-control"
+          id="identifier"
+          name="identifier"
+          required
+          autofocus
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="fas fa-sign-in-alt me-2"></i> Login
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document
+    .getElementById("loginForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const identifier = document.getElementById("identifier").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const response = await fetch("/admin/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ identifier, password }),
+        });
+
+        const data = await response.json();
+
+        if (data.status === "success") {
+          window.location.href = data.redirectUrl;
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Terjadi kesalahan saat login");
+      }
+    });
+</script>

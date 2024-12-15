@@ -1,0 +1,252 @@
+<!-- views/customer/pages/layanan/pakaian/index.ejs -->
+<div class="container py-5">
+  <div class="row">
+    <!-- Sidebar Kategori -->
+    <div class="col-lg-3">
+      <h1 class="h3 pb-4">Kategori Pakaian</h1>
+
+      <!-- List Kategori dengan style sederhana -->
+      <div class="kategori-list">
+        <!-- Link Semua Kategori -->
+        <a
+          href="/pakaian"
+          class="kategori-item <%= !selectedKategori ? 'active' : '' %>"
+        >
+          <span>Semua Kategori</span>
+          <i class="fa fa-chevron-right"></i>
+        </a>
+
+        <!-- List Kategori -->
+        <% if(kategoriPakaian && kategoriPakaian.length > 0) { %> <%
+        kategoriPakaian.forEach(kategori => { %>
+        <a
+          href="/pakaian/kategori/<%= kategori.id_kategori_pakaian %>"
+          class="kategori-item <%= selectedKategori === kategori.id_kategori_pakaian ? 'active' : '' %>"
+        >
+          <span><%= kategori.nama_kategori_pakaian %></span>
+          <i class="fa fa-chevron-right"></i>
+        </a>
+        <% }); %> <% } else { %>
+        <div class="kategori-item disabled">Tidak ada kategori tersedia</div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Daftar Pakaian -->
+    <div class="col-lg-9">
+      <div class="row">
+        <!-- Search Bar -->
+        <div class="col-12 mb-4">
+          <form action="/pakaian/search" method="GET" class="d-flex">
+            <input
+              type="text"
+              name="q"
+              class="form-control me-2"
+              placeholder="Cari model pakaian..."
+            />
+            <button class="btn btn-success" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- Filter dan Sorting -->
+        <div class="col-12 pb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="h3">
+                <%= selectedKategori ? kategoriInfo.nama_kategori_pakaian :
+                'Semua Pakaian' %>
+              </h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daftar Pakaian -->
+        <% if(pakaianList && pakaianList.length > 0) { %>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          <% pakaianList.forEach(pakaian => { %>
+          <div class="col">
+            <div class="card h-100 product-wap rounded-0">
+              <div class="card h-100 rounded-0">
+                <!-- Gambar Pakaian dengan aspek rasio tetap -->
+                <div class="product-img-container">
+                  <% if(pakaian.GambarPakaian && pakaian.GambarPakaian.length >
+                  0) { %>
+                  <img
+                    class="card-img rounded-0 img-fluid product-img"
+                    src="/uploads/admin/produk-pakaian/<%= pakaian.GambarPakaian[0].nama_file %>"
+                    alt="<%= pakaian.nama_pakaian %>"
+                  />
+                  <% } else { %>
+                  <img
+                    class="card-img rounded-0 img-fluid product-img"
+                    src="https://placehold.co/400x320?text="
+                    alt="Product Image Placeholder"
+                  />
+                  <% } %>
+                </div>
+
+                <!-- Overlay -->
+                <div
+                  class="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center"
+                >
+                  <ul class="list-unstyled">
+                    <li>
+                      <a
+                        class="btn btn-success text-white mt-2"
+                        href="/pakaian/detail/<%= pakaian.id_pakaian %>"
+                      >
+                        <i class="far fa-eye"></i> Detail
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <!-- Nama Pakaian dengan batasan tinggi -->
+                <div class="product-title-container">
+                  <a
+                    href="/pakaian/detail/<%= pakaian.id_pakaian %>"
+                    class="h3 text-decoration-none product-title"
+                  >
+                    <%= pakaian.nama_pakaian %>
+                  </a>
+                </div>
+
+                <!-- Varian yang tersedia -->
+                <% if(pakaian.VarianPakaian && pakaian.VarianPakaian.length > 0)
+                { %>
+                <div class="variant-container">
+                  <small class="text-muted">Ukuran tersedia:</small>
+                  <div class="d-flex flex-wrap gap-1 mt-1">
+                    <% let ukuranUnique = [...new
+                    Set(pakaian.VarianPakaian.map(v => v.ukuran))]; %> <%
+                    ukuranUnique.forEach(ukuran => { %>
+                    <span class="badge bg-light text-dark"><%= ukuran %></span>
+                    <% }) %>
+                  </div>
+                </div>
+                <% } %>
+
+                <!-- Harga -->
+                <p class="text-center mb-0 price">
+                  Rp <%= pakaian.harga.toLocaleString('id-ID') %>
+                </p>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <div class="col-12">
+          <div class="alert alert-info text-center">
+            Belum ada pakaian yang tersedia.
+          </div>
+        </div>
+        <% } %>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+        <div class="row">
+          <div class="col-12">
+            <ul class="pagination pagination-lg justify-content-end">
+              <% for(let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                <a
+                  class="page-link rounded-0 mr-3 shadow-sm border-top-0 border-left-0 text-dark"
+                  href="/pakaian?page=<%= i %><%= selectedKategori ? '&kategori=' + selectedKategori : '' %>"
+                >
+                  <%= i %>
+                </a>
+              </li>
+              <% } %>
+            </ul>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CSS Kustom -->
+<style>
+  .product-wap {
+    transition: all 0.3s;
+  }
+
+  .product-wap:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-overlay {
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .product-wap:hover .product-overlay {
+    opacity: 1;
+  }
+
+  .card-img {
+    height: 250px;
+    object-fit: cover;
+  }
+
+  .product-overlay ul li {
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .product-wap:hover .product-overlay ul li {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .kategori-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .kategori-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .kategori-item:hover {
+    background-color: #f8f9fa;
+    color: #333;
+    text-decoration: none;
+  }
+
+  .kategori-item.active {
+    background-color: #f8f9fa;
+    font-weight: 500;
+  }
+
+  .kategori-item .fa {
+    font-size: 12px;
+    opacity: 0.5;
+  }
+
+  .kategori-item:hover .fa {
+    opacity: 1;
+  }
+
+  .kategori-item.disabled {
+    color: #6c757d;
+    cursor: not-allowed;
+  }
+</style>

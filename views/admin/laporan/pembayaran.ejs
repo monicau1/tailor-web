@@ -1,0 +1,197 @@
+<!-- views/admin/laporan/pembayaran.ejs -->
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="mb-0">Laporan Pembayaran</h3>
+        <p class="text-muted">Kelola dan pantau semua transaksi pembayaran</p>
+      </div>
+      <div>
+        <button class="btn btn-success" onclick="exportToExcel()">
+          <i class="fas fa-file-excel me-1"></i> Export Excel
+        </button>
+      </div>
+    </div>
+  
+    <!-- Filter Panel -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <form id="filterForm" method="GET">
+          <div class="row g-3">
+            <!-- Period Filter -->
+            <div class="col-md-4">
+              <div class="input-group">
+                <span class="input-group-text">Periode</span>
+                <input type="date" class="form-control" id="startDate" name="start_date" value="<%= query.start_date || '' %>">
+                <span class="input-group-text">-</span>
+                <input type="date" class="form-control" id="endDate" name="end_date" value="<%= query.end_date || '' %>">
+              </div>
+            </div>
+  
+            <!-- Status Filter -->
+            <div class="col-md-2">
+              <select class="form-select" name="status">
+                <option value="">Semua Status</option>
+                <option value="pending" <%= query.status === 'pending' ? 'selected' : '' %>>Menunggu</option>
+                <option value="paid" <%= query.status === 'paid' ? 'selected' : '' %>>Sukses</option>
+                <option value="failed" <%= query.status === 'failed' ? 'selected' : '' %>>Gagal</option>
+              </select>
+            </div>
+  
+            <!-- Reset Button -->
+            <div class="col-md-1">
+              <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                <i class="fas fa-undo"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  
+    <!-- Summary Cards -->
+ 
+  
+    <!-- Payment List -->
+    <div class="card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>No. Pesanan</th>
+              <th>Tanggal</th>
+              <th>Pelanggan</th>
+              <th>Metode</th>
+              <th>Bank</th>
+              <th>Nama Rekening</th>
+              <th>Jumlah</th>
+              <th>Status</th>
+              <th width="100">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(function(payment) { %>
+              <tr>
+                <td>
+                  <strong>#<%= payment.Pesanan.id_pesanan %></strong>
+                  <div class="text-muted small"><%= payment.Pesanan.jenis_layanan %></div>
+                </td>
+                <td><%= formatDateTime(payment.tanggal_pembayaran) %></td>
+                <td>
+                  <%= payment.Pesanan.PelangganPesanan.nama_pelanggan %>
+                  <div class="text-muted small"><%= payment.Pesanan.PelangganPesanan.nomor_telepon_pelanggan %></div>
+                </td>
+                <td><%= payment.metode_pembayaran %></td>
+                <td><%= payment.bank_asal || '-' %></td>
+                <td>
+                  <% if(payment.nama_rekening) { %>
+                    <%= payment.nama_rekening %>
+                    <div class="text-muted small"><%= payment.nomor_rekening %></div>
+                  <% } else { %>
+                    -
+                  <% } %>
+                </td>
+                <td class="text-end">Rp <%= formatNumber(payment.jumlah_dibayar) %></td>
+                <td>
+                  <span class="badge bg-<%= payment.status_pembayaran === 'paid' ? 'success' : (payment.status_pembayaran === 'pending' ? 'warning' : 'danger') %>">
+                    <%= formatStatus(payment.status_pembayaran) %>
+                  </span>
+                </td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <a href="/admin/pesanan/<%= payment.Pesanan.id_pesanan %>" 
+                       class="btn btn-outline-primary" title="Detail">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+  
+      <!-- Pagination -->
+      <div class="card-footer d-flex justify-content-between align-items-center">
+        <div>
+          Menampilkan <%= payments.length %> dari <%= pagination.totalPages * 10 %> pembayaran
+        </div>
+        <% if (pagination.totalPages > 1) { %>
+          <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+                    <li class="page-item <%= pagination.currentPage === i ? 'active' : '' %>">
+                      <a class="page-link" href="?page=<%= i %>
+                        <%= query.start_date ? '&start_date=' + query.start_date : '' %>
+                        <%= query.end_date ? '&end_date=' + query.end_date : '' %>
+                        <%= query.status ? '&status=' + query.status : '' %>">
+                        <%= i %>
+                      </a>
+                    </li>
+                  <% } %>
+                </ul>
+              </nav>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <style>
+    .badge {
+      font-weight: 500;
+      padding: 0.5em 0.8em;
+    }
+    
+    .table > tbody > tr > td {
+      padding: 1rem 0.75rem;
+    }
+    
+    .btn-group-sm > .btn {
+      padding: 0.25rem 0.5rem;
+    }
+    
+    .card {
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    </style>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterForm = document.getElementById('filterForm');
+      const startDate = document.getElementById('startDate');
+      const endDate = document.getElementById('endDate');
+    
+      // Set default date range ke bulan ini
+      if (!startDate.value || !endDate.value) {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+        startDate.value = firstDay.toISOString().split('T')[0];
+        endDate.value = lastDay.toISOString().split('T')[0];
+      }
+    
+      // Reset filter function
+      window.resetFilters = function() {
+        filterForm.reset();
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        
+        startDate.value = firstDay.toISOString().split('T')[0];
+        endDate.value = lastDay.toISOString().split('T')[0];
+        filterForm.submit();
+      }
+    
+      // Export to Excel function
+      window.exportToExcel = function() {
+        const params = new URLSearchParams(new FormData(filterForm));
+        window.location.href = `/admin/laporan/pembayaran/export?${params.toString()}`;
+      }
+    
+      // Submit form when date changes
+      startDate.addEventListener('change', () => filterForm.submit());
+      endDate.addEventListener('change', () => filterForm.submit());
+    });
+    </script>

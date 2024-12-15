@@ -1,0 +1,82 @@
+<!-- views/customer/pages/layanan/pakaian/kategori-detail.ejs -->
+<div class="container py-5">
+  <div class="row">
+    <!-- Breadcrumb -->
+    <div class="col-12 mb-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item">
+            <a href="/pakaian">Katalog Pakaian</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <%= kategori.nama_kategori_pakaian %>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- Judul Kategori -->
+    <div class="col-12 mb-4">
+      <h1 class="h2"><%= kategori.nama_kategori_pakaian %></h1>
+      <% if(kategori.deskripsi) { %>
+      <p class="text-muted"><%= kategori.deskripsi %></p>
+      <% } %>
+    </div>
+
+    <!-- Daftar Pakaian dalam Kategori -->
+    <div class="col-12">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <% if(kategori.Pakaian && kategori.Pakaian.length > 0) { %> <%
+        kategori.Pakaian.forEach(pakaian => { %>
+        <div class="col">
+          <div class="card h-100">
+            <!-- Gambar Pakaian -->
+            <img
+              src="<%= pakaian.GambarPakaian ? `/uploads/admin/produk-pakaian/${pakaian.GambarPakaian[0]?.nama_file}` : 'https://placehold.co/400x300?text=No+Image' %>"
+              class="card-img-top"
+              alt="<%= pakaian.nama_pakaian %>"
+            />
+
+            <div class="card-body">
+              <h5 class="card-title"><%= pakaian.nama_pakaian %></h5>
+              <p class="card-text text-muted mb-2">
+                Rp <%= pakaian.harga.toLocaleString('id-ID') %>
+              </p>
+
+              <!-- Varian yang tersedia -->
+              <% if(pakaian.VarianPakaian && pakaian.VarianPakaian.length > 0) {
+              %>
+              <div class="mb-3">
+                <small class="text-muted">Ukuran tersedia:</small>
+                <div class="d-flex flex-wrap gap-1 mt-1">
+                  <% let ukuranUnique = [...new Set(pakaian.VarianPakaian.map(v
+                  => v.ukuran))]; %> <% ukuranUnique.forEach(ukuran => { %>
+                  <span class="badge bg-light text-dark"><%= ukuran %></span>
+                  <% }) %>
+                </div>
+              </div>
+              <% } %>
+
+              <div class="d-grid">
+                <a
+                  href="/pakaian/detail/<%= pakaian.id_pakaian %>"
+                  class="btn btn-success"
+                >
+                  Lihat Detail
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% }); %> <% } else { %>
+        <div class="col-12">
+          <div class="alert alert-info">
+            Belum ada pakaian dalam kategori ini.
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

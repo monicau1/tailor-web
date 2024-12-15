@@ -1,0 +1,156 @@
+<!-- views/admin/pegawai/pegawai-tambah.ejs -->
+<div class="content flex-grow-1">
+  <div class="container">
+    <div class="header mb-4">
+      <a href="/admin/pegawai" class="text-decoration-none">
+        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Pegawai
+      </a>
+      <h1 class="mt-2">Tambah Pegawai Baru</h1>
+    </div>
+
+    <form id="pegawaiForm" class="card">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="namaPegawai" class="form-label">Nama Pegawai*</label>
+            <input
+              type="text"
+              class="form-control"
+              id="namaPegawai"
+              name="nama_pegawai"
+              required
+              minlength="3"
+              maxlength="100"
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="username" class="form-label">Username*</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              required
+              minlength="3"
+              maxlength="100"
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="emailPegawai" class="form-label">Email*</label>
+            <input
+              type="email"
+              class="form-control"
+              id="emailPegawai"
+              name="email_pegawai"
+              required
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="passwordPegawai" class="form-label">Password*</label>
+            <input
+              type="password"
+              class="form-control"
+              id="passwordPegawai"
+              name="password_pegawai"
+              required
+              minlength="6"
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="nomorTelepon" class="form-label">Nomor Telepon*</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="nomorTelepon"
+              name="nomor_telepon_pegawai"
+              required
+              pattern="^[0-9+\-\s()]*$"
+            />
+          </div>
+
+          <div class="col-md-6">
+            <label for="tanggalMasuk" class="form-label">Tanggal Masuk*</label>
+            <input
+              type="date"
+              class="form-control"
+              id="tanggalMasuk"
+              name="tanggal_masuk_pegawai"
+              required
+              max="<%= new Date().toISOString().split('T')[0] %>"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="d-flex justify-content-end gap-2">
+          <a href="/admin/pegawai" class="btn btn-secondary">Batal</a>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Alert Container -->
+<div id="alertContainer"></div>
+
+<%- contentFor('scripts') %>
+<script>
+  document
+    .getElementById("pegawaiForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = {
+        nama_pegawai: document.getElementById("namaPegawai").value,
+        username: document.getElementById("username").value,
+        email_pegawai: document.getElementById("emailPegawai").value,
+        password_pegawai: document.getElementById("passwordPegawai").value,
+        nomor_telepon_pegawai: document.getElementById("nomorTelepon").value,
+        tanggal_masuk_pegawai: document.getElementById("tanggalMasuk").value,
+      };
+
+      try {
+        // Tambahkan log untuk melihat data yang dikirim
+        console.log("Mengirim data:", formData);
+
+        const response = await fetch("/admin/pegawai/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+        console.log("Response:", data); // Tambahkan log response
+
+        if (data.status === "success") {
+          window.location.href = "/admin/pegawai";
+        } else {
+          // Tampilkan pesan error lebih detail
+          const alertContainer = document.getElementById("alertContainer");
+          alertContainer.innerHTML = `
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            Error: ${data.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        `;
+        }
+      } catch (error) {
+        console.error("Error lengkap:", error); // Log error lengkap
+        const alertContainer = document.getElementById("alertContainer");
+        alertContainer.innerHTML = `
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          Terjadi kesalahan: ${error.message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+      }
+    });
+</script>

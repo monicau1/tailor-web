@@ -1,0 +1,199 @@
+<!-- views/customer/pages/orders/index.ejs -->
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Daftar Pesanan Saya</h2>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Jenis Layanan</label>
+          <select
+            class="form-select"
+            id="filterLayanan"
+            onchange="applyFilter()"
+          >
+            <option value="all">Semua Layanan</option>
+            <option value="permak">Layanan Permak</option>
+            <option value="pakaian">Layanan Jahit Pakaian</option>
+            <!-- Ubah ke "pakaian" -->
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Status Pesanan</label>
+          <select
+            class="form-select"
+            id="filterStatus"
+            onchange="applyFilter()"
+          >
+            <option value="all">Semua Status</option>
+            <% Object.values(STATUS_PESANAN).forEach(status => { %>
+            <option value="<%= status %>"><%= formatStatus(status) %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daftar Pesanan -->
+  <% if(pesanan && pesanan.length > 0) { %>
+  <div class="row" id="pesananContainer">
+    <% pesanan.forEach(order => { %>
+    <div
+      class="col-lg-6 mb-4 pesanan-item"
+      data-jenis="<%= order.jenis_layanan %>"
+      data-status="<%= order.Status.nama_status %>"
+    >
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted">#<%= order.id_pesanan %></span>
+              <% if(order.jenis_layanan === 'pakaian') { %>
+              <span class="badge bg-primary ms-2">Jahit Pakaian</span>
+              <% } else if(order.jenis_layanan === 'permak') { %>
+              <span class="badge bg-info ms-2">Permak</span>
+              <% } %>
+            </div>
+            <span
+              class="badge bg-<%= getStatusColor(order.Status.nama_status) %>"
+            >
+              <%= getStatusDisplay(order.Status.nama_status) %>
+            </span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <!-- Tanggal Pesanan -->
+          <div class="mb-3">
+            <small class="text-muted d-block">Tanggal Pesanan:</small>
+            <span>
+              <%= new Date(order.tanggal_pesanan).toLocaleDateString('id-ID', {
+              day: 'numeric', month: 'long', year: 'numeric' }) %>
+            </span>
+          </div>
+
+          <!-- Estimasi Selesai -->
+          <% if(order.estimasi_selesai) { %>
+          <div class="mb-3">
+            <small class="text-muted d-block">Estimasi Selesai:</small>
+            <span>
+              <%= new Date(order.estimasi_selesai).toLocaleDateString('id-ID', {
+              day: 'numeric', month: 'long', year: 'numeric' }) %>
+            </span>
+          </div>
+          <% } %>
+
+          <!-- Total Pesanan -->
+          <div class="mb-3">
+            <small class="text-muted d-block">Total Pesanan:</small>
+            <span class="fw-bold">
+              Rp <%= order.jumlah_total.toLocaleString('id-ID') %>
+            </span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-grid gap-2">
+            <a
+              href="/orders/<%= order.id_pesanan %>/<%= order.jenis_layanan %>"
+              class="btn btn-primary"
+            >
+              <i class="fas fa-eye me-2"></i>Lihat Detail
+            </a>
+
+            <% if(order.Status.nama_status ===
+            STATUS_PESANAN.MENUNGGU_PEMBAYARAN) { %>
+            <a
+              href="/orders/<%= order.id_pesanan %>/upload-payment"
+              class="btn btn-success"
+            >
+              <i class="fas fa-upload me-2"></i>Upload Pembayaran
+            </a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <!-- Pagination -->
+  <% if (totalPages > 1) { %>
+  <nav aria-label="Navigasi halaman" class="mt-4">
+    <ul class="pagination justify-content-center">
+      <% for(let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+        <a class="page-link" href="/orders?page=<%= i %>"><%= i %></a>
+      </li>
+      <% } %>
+    </ul>
+  </nav>
+  <% } %> <% } else { %>
+  <!-- Empty State -->
+  <div class="text-center py-5">
+    <div class="mb-4">
+      <i class="fas fa-shopping-bag fa-3x text-muted"></i>
+    </div>
+    <h4>Belum Ada Pesanan</h4>
+    <p class="text-muted mb-4">
+      Anda belum memiliki pesanan. Mulai pesan layanan sekarang!
+    </p>
+  </div>
+  <% } %>
+</div>
+
+<style>
+  .card {
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+  }
+
+  .btn i {
+    font-size: 0.9em;
+  }
+
+  .page-link {
+    color: #0d6efd;
+    border-radius: 0;
+  }
+
+  .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  .text-muted {
+    color: #6c757d !important;
+  }
+</style>
+
+<script>
+  function applyFilter() {
+    const filterLayanan = document.getElementById("filterLayanan").value;
+    const filterStatus = document.getElementById("filterStatus").value;
+    const items = document.getElementsByClassName("pesanan-item");
+
+    Array.from(items).forEach((item) => {
+      const jenisLayanan = item.dataset.jenis;
+      const status = item.dataset.status;
+
+      const matchLayanan =
+        filterLayanan === "all" || jenisLayanan === filterLayanan;
+      const matchStatus = filterStatus === "all" || status === filterStatus;
+
+      item.style.display = matchLayanan && matchStatus ? "block" : "none";
+    });
+  }
+</script>

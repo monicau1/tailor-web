@@ -1,0 +1,117 @@
+<!-- views/admin/pegawai/pegawai.ejs -->
+<div class="content flex-grow-1">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Daftar Pegawai</h2>
+    <div>
+      <% if (canCreatePegawai) { %>
+      <button
+        class="btn btn-primary"
+        onclick="window.location.href='/admin/pegawai/create'"
+      >
+        + Tambah Pegawai
+      </button>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Alert untuk notifikasi -->
+  <div id="alertContainer"></div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex gap-2" style="width: 300px">
+          <!-- Search Input -->
+          <div class="input-group">
+            <input
+              type="text"
+              id="searchInput"
+              class="form-control"
+              placeholder="Cari pegawai..."
+              value="<%= query.search %>"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              id="searchButton"
+            >
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Pegawai</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Nomor Telepon</th>
+              <th>Tanggal Masuk</th>
+              <th>Role</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="pegawaiTableBody">
+            <% if (pegawaiList.length > 0) { %> <% pegawaiList.forEach((pegawai,
+            index) => { %>
+            <tr>
+              <td>
+                <%= (pagination.currentPage - 1) * pagination.itemsPerPage +
+                index + 1 %>
+              </td>
+              <td><%= pegawai.nama_pegawai %></td>
+              <td><%= pegawai.username %></td>
+              <td><%= pegawai.email_pegawai %></td>
+              <td><%= pegawai.nomor_telepon_pegawai %></td>
+              <td>
+                <%= new
+                Date(pegawai.tanggal_masuk_pegawai).toLocaleDateString('id-ID')
+                %>
+              </td>
+              <td><%= pegawai.role %></td>
+              <td>
+                <div class="btn-group">
+                  <a
+                    href="/admin/pegawai/<%= pegawai.id_pegawai %>"
+                    class="btn btn-outline-primary btn-sm"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            <% }) %> <% } else { %>
+            <tr>
+              <td colspan="6" class="text-center">Tidak ada data pegawai</td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <nav>
+          <ul class="pagination mb-0">
+            <% for(let i=1; i<=pagination.totalPages; i++) { %>
+            <li
+              class="page-item <%= pagination.currentPage === i ? 'active' : '' %>"
+            >
+              <button class="page-link" onclick="changePage('<%= i %>')">
+                <%= i %>
+              </button>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+        <div><%= pagination.total_items %> Hasil</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- contentFor('scripts') %>
+<script src="/admin/js/pegawai/index.js"></script>
